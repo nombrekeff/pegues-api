@@ -12,6 +12,7 @@ Table User {
   lastname String
   posts Post [not null]
   zones Zone [not null]
+  routes Route [not null]
   role Role [not null]
 }
 
@@ -33,6 +34,18 @@ Table Zone {
   name String [unique, not null]
   author User
   authorId String
+  routes Route [not null]
+}
+
+Table Route {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  name String [not null]
+  author User
+  authorId String
+  zone Zone
+  zoneId String
 }
 
 Enum Role {
@@ -43,3 +56,7 @@ Enum Role {
 Ref: Post.authorId > User.id
 
 Ref: Zone.authorId > User.id
+
+Ref: Route.authorId > User.id
+
+Ref: Route.zoneId > Zone.id

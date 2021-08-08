@@ -1,0 +1,13 @@
+query UserRoutes {
+  userRoutes(userId: "USER_ID") {
+    ...RouteData
+  }
+}
+
+fragment RouteData on Route {
+  id
+  createdAt
+  updatedAt
+  name
+  zone
+}

@@ -108,6 +108,19 @@ enum Role {
   USER
 }
 
+type Route {
+  author: User!
+
+  """Identifies the date and time when the object was created."""
+  createdAt: Date!
+  id: ID!
+  name: String!
+
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: Date!
+  zone: Zone!
+}
+
 input SignupInput {
   email: String!
   firstname: String
@@ -141,6 +154,7 @@ type User {
   lastname: String
   posts: [Post!]!
   role: Role!
+  routes: [Route!]!
 
   """Identifies the date and time when the object was last updated."""
   updatedAt: Date!
@@ -154,6 +168,7 @@ type Zone {
   createdAt: Date!
   id: ID!
   name: String!
+  routes: [Route!]!
 
   """Identifies the date and time when the object was last updated."""
   updatedAt: Date!

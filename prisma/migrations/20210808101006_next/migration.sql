@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Route" ADD COLUMN     "zoneId" TEXT;
+
+-- AddForeignKey
+ALTER TABLE "Route" ADD FOREIGN KEY ("zoneId") REFERENCES "Zone"("id") ON DELETE SET NULL ON UPDATE CASCADE;

@@ -1,6 +1,8 @@
 import { IsNotEmpty } from 'class-validator';
 
-export class CreateZoneInput {
+export class CreateRouteInput {
   @IsNotEmpty()
   name: string;
+
+  zoneId: string;
 }

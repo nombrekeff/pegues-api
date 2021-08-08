@@ -7,6 +7,7 @@ import {
 import { Post } from './post.model';
 import { BaseModel } from './base.model';
 import { Zone } from './zone.model';
+import { Route } from './route.model';
 
 export enum Role {
   ADMIN = 'ADMIN',
@@ -24,7 +25,10 @@ export class User extends BaseModel {
   firstname?: string;
   lastname?: string;
   role: Role;
+  
   zones: Zone[];
+  routes: Route[];
+
   posts: Post[];
   @HideField()
   password: string;

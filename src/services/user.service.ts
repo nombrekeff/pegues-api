@@ -11,6 +11,16 @@ export class UserService {
     private passwordService: PasswordService
   ) {}
 
+  findUser(userId: string) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        zones: true,
+        routes: true,
+      },
+    });
+  }
+
   updateUser(userId: string, newUserData: UpdateUserInput) {
     return this.prisma.user.update({
       data: newUserData,

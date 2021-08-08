@@ -14,7 +14,7 @@ export class AuthController {
   ) {}
 
   @Post('login')
-  async getHelloName(@Body() { email, password }: LoginData): Promise<Token> {
+  async login(@Body() { email, password }: LoginData): Promise<Token> {
     const resp = await this.auth.login(email.toLowerCase(), password);
 
     return resp;

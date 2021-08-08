@@ -14,6 +14,8 @@ import { AuthController } from './controllers/auth.controller';
 import { UserController } from './controllers/user.controller';
 import { ZoneModule } from './resolvers/zone/zone.module';
 import { ZonesController } from './controllers/zones.controller';
+import { RouteModule } from './resolvers/route/route.module';
+import { RoutesController } from './controllers/route.controller';
 
 @Module({
   imports: [
@@ -40,8 +42,15 @@ import { ZonesController } from './controllers/zones.controller';
     UserModule,
     PostModule,
     ZoneModule,
+    RouteModule,
   ],
-  controllers: [AppController, AuthController, UserController, ZonesController],
+  controllers: [
+    AppController, 
+    AuthController, 
+    UserController, 
+    ZonesController,
+    RoutesController,
+  ],
   providers: [AppService, AppResolver, DateScalar],
 })
 export class AppModule {}

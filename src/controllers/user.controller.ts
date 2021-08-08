@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
-import { User } from '@prisma/client';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { User } from 'src/models/user.model';
 import { UserService } from 'src/services/user.service';
 import { AppService } from '../services/app.service';
 
@@ -16,7 +16,7 @@ export class UserController {
   ) {}
 
   @Get('me')
-  async getUser(@CurrentUser() user: User): Promise<User> {
-    return user;
+  async getUser(@CurrentUser() user: User) {
+    return this.userService.findUser(user.id);
   }
 }

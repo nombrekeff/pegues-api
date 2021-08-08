@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateZoneInput } from 'src/resolvers/zone/dto/create-zone.input';
 
@@ -11,6 +12,9 @@ export class ZonesService {
       where: {
         authorId: userId,
       },
+      include: {
+        routes: true,
+      }
     });
   }
 
@@ -22,12 +26,16 @@ export class ZonesService {
           authorId: userId,
         },
       });
-
-      return {
-        zone: zone,
-      };
+      return zone;
     } catch (e) {
-      throw new Error(e);
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code === 'P2002'
+      ) {
+        throw new ConflictException(`zone '${zoneData.name}' already used.`);
+      } else {
+        throw new Error(e);
+      }
     }
   }
 }
