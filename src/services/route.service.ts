@@ -24,6 +24,7 @@ export class RoutesService {
           name: routeData.name,
           zoneId: routeData.zoneId,
           authorId: userId,
+          grade: routeData.grade,
         },
       });
       return route;

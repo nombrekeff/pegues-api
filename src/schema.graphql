@@ -24,6 +24,34 @@ input CreatePostInput {
 """Date custom scalar type"""
 scalar Date
 
+"""Route grade"""
+enum Grade {
+  g3
+  g4
+  g5
+  g6A
+  g6AP
+  g6B
+  g6BP
+  g6C
+  g6CP
+  g7A
+  g7AP
+  g7B
+  g7BP
+  g7C
+  g7CP
+  g8A
+  g8AP
+  g8B
+  g8BP
+  g8C
+  g8CP
+  g9A
+  g9AP
+  uknown
+}
+
 input LoginInput {
   email: String!
   password: String!
@@ -113,6 +141,7 @@ type Route {
 
   """Identifies the date and time when the object was created."""
   createdAt: Date!
+  grade: Grade!
   id: ID!
   name: String!
 

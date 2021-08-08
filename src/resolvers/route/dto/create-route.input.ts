@@ -1,3 +1,4 @@
+import { Grade } from '@prisma/client';
 import { IsNotEmpty } from 'class-validator';
 
 export class CreateRouteInput {
@@ -5,4 +6,5 @@ export class CreateRouteInput {
   name: string;
 
   zoneId: string;
+  grade: Grade;
 }

@@ -52,7 +52,9 @@ model Route {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   name      String   
-  
+
+  grade     Grade    @default(uknown)
+
   author    User?    @relation(fields: [authorId], references: [id])
   authorId  String?
 
@@ -63,4 +65,35 @@ model Route {
 enum Role {
   ADMIN
   USER
+}
+
+enum Grade {
+  uknown
+  g3
+  g4
+  g5
+
+  g6A
+  g6AP
+  g6B
+  g6BP
+  g6C
+  g6CP
+
+  g7A
+  g7AP
+  g7B
+  g7BP
+  g7C
+  g7CP
+
+  g8A
+  g8AP
+  g8B
+  g8BP
+  g8C
+  g8CP
+
+  g9A
+  g9AP
 }
