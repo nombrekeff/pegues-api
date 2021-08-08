@@ -10,6 +10,10 @@ import { DateScalar } from './common/scalars/date.scalar';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import config from './configs/config';
 import { GraphqlConfig } from './configs/config.interface';
+import { AuthController } from './controllers/auth.controller';
+import { UserController } from './controllers/user.controller';
+import { ZoneModule } from './resolvers/zone/zone.module';
+import { ZonesController } from './controllers/zones.controller';
 
 @Module({
   imports: [
@@ -35,8 +39,9 @@ import { GraphqlConfig } from './configs/config.interface';
     AuthModule,
     UserModule,
     PostModule,
+    ZoneModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, AuthController, UserController, ZonesController],
   providers: [AppService, AppResolver, DateScalar],
 })
 export class AppModule {}

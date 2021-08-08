@@ -1,0 +1,12 @@
+query UserZones {
+  userZones(userId: "USER_ID") {
+    ...ZoneData
+  }
+}
+
+fragment ZoneData on Zone {
+  id
+  createdAt
+  updatedAt
+  name
+}

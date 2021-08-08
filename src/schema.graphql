@@ -144,4 +144,17 @@ type User {
 
   """Identifies the date and time when the object was last updated."""
   updatedAt: Date!
+  zones: [Zone!]!
+}
+
+type Zone {
+  author: User!
+
+  """Identifies the date and time when the object was created."""
+  createdAt: Date!
+  id: ID!
+  name: String!
+
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: Date!
 }

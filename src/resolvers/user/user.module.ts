@@ -7,5 +7,6 @@ import { PasswordService } from '../../services/password.service';
 @Module({
   imports: [PrismaModule],
   providers: [UserResolver, UserService, PasswordService],
+  exports: [UserService],
 })
 export class UserModule {}
