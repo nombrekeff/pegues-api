@@ -20,21 +20,9 @@ model User {
   password  String
   firstname String?
   lastname  String?
-  posts     Post[]
   zones     Zone[]
   routes    Route[]
   role      Role
-}
-
-model Post {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  published Boolean
-  title     String
-  content   String?
-  author    User?    @relation(fields: [authorId], references: [id])
-  authorId  String?
 }
 
 model Zone {
@@ -48,18 +36,22 @@ model Zone {
 }
 
 model Route {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  name      String   
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  name        String   
+  description String?   
+  grade       Grade     @default(uknown)
 
-  grade     Grade    @default(uknown)
+  ascentAt    DateTime?
+  sessions    Int       @default(0)
+  tries       Int       @default(0)
 
-  author    User?    @relation(fields: [authorId], references: [id])
-  authorId  String?
+  author      User?     @relation(fields: [authorId], references: [id])
+  authorId    String?
 
-  zone      Zone?    @relation(fields: [zoneId], references: [id])
-  zoneId    String?
+  zone        Zone?     @relation(fields: [zoneId], references: [id])
+  zoneId      String?
 }
 
 enum Role {

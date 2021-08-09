@@ -4,11 +4,9 @@ import { AppController } from './controllers/app.controller';
 import { AppService } from './services/app.service';
 import { AuthModule } from './resolvers/auth/auth.module';
 import { UserModule } from './resolvers/user/user.module';
-import { PostModule } from './resolvers/post/post.module';
 import { AppResolver } from './resolvers/app.resolver';
 import { DateScalar } from './common/scalars/date.scalar';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import config from './configs/config';
 import { GraphqlConfig } from './configs/config.interface';
 import { AuthController } from './controllers/auth.controller';
 import { UserController } from './controllers/user.controller';
@@ -16,6 +14,7 @@ import { ZoneModule } from './resolvers/zone/zone.module';
 import { ZonesController } from './controllers/zones.controller';
 import { RouteModule } from './resolvers/route/route.module';
 import { RoutesController } from './controllers/route.controller';
+import config from './configs/config';
 
 @Module({
   imports: [
@@ -40,7 +39,6 @@ import { RoutesController } from './controllers/route.controller';
     }),
     AuthModule,
     UserModule,
-    PostModule,
     ZoneModule,
     RouteModule,
   ],

@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { CreateRouteInput } from 'src/resolvers/route/dto/create-route.input';
+import { UpdateRouteInput } from 'src/resolvers/route/dto/update-route.input';
 import { RoutesService } from 'src/services/route.service';
 
 @Controller('routes')
@@ -16,13 +17,16 @@ export class RoutesController {
 
   @Get('')
   async getMyRoutes(@CurrentUser() user: User) {
-    const zones = await this.routeService.getRoutesForUser(user.id);
-    return zones;
+    return await this.routeService.getRoutesForUser(user.id);
   }
 
   @Post('')
   async addRoute(@CurrentUser() user: User, @Body() data: CreateRouteInput) {
-    const response = await this.routeService.createRoute(user.id, data);
-    return response;
+    return await this.routeService.createRoute(user.id, data);
+  }
+
+  @Put(':id')
+  async editRoute(@Param('id') id: string, @Body() data: UpdateRouteInput) {
+    return await this.routeService.updateRoute(id, data);
   }
 }

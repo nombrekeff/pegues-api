@@ -42,7 +42,13 @@ registerEnumType(Grade, {
 @ObjectType()
 export class Route extends BaseModel {
   name: string;
+  description: string;
+
   author: User;
   zone: Zone;
   grade: Grade = Grade.uknown;
+
+  ascentAt: Date;
+  sessions: number;
+  tries: number;
 }

@@ -1,7 +1,7 @@
 import { Grade } from '@prisma/client';
-import { IsNotEmpty } from 'class-validator';
+import { IsEnum, IsNotEmpty } from 'class-validator';
 
-export class CreateRouteInput {
+export class UpdateRouteInput {
   @IsNotEmpty()
   name: string;
 
@@ -10,5 +10,7 @@ export class CreateRouteInput {
   tries: number;
 
   zoneId: string;
+
+  @IsEnum(Grade)
   grade: Grade;
 }

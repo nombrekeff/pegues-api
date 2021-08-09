@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
@@ -10,9 +18,7 @@ import { ZonesService } from 'src/services/zones.service';
 @ApiTags('zones')
 @UseGuards(AuthGuard('jwt'))
 export class ZonesController {
-  constructor(
-    private readonly zoneService: ZonesService,
-  ) {}
+  constructor(private readonly zoneService: ZonesService) {}
 
   @Get('')
   async getMyZones(@CurrentUser() user: User) {
@@ -22,7 +28,11 @@ export class ZonesController {
 
   @Post('')
   async addZone(@CurrentUser() user: User, @Body() data: CreateZoneInput) {
-    const response = await this.zoneService.createZone(user.id, data);
-    return response;
+    return await this.zoneService.createZone(user.id, data);
+  }
+
+  @Put(':id')
+  async editZone(@Param('id') id: string, @Body() data: CreateZoneInput) {
+    return await this.zoneService.updateZone(id, data);
   }
 }

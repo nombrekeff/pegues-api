@@ -4,7 +4,6 @@ import {
   registerEnumType,
   HideField,
 } from '@nestjs/graphql';
-import { Post } from './post.model';
 import { BaseModel } from './base.model';
 import { Zone } from './zone.model';
 import { Route } from './route.model';
@@ -29,7 +28,6 @@ export class User extends BaseModel {
   zones: Zone[];
   routes: Route[];
 
-  posts: Post[];
   @HideField()
   password: string;
 }
