@@ -31,10 +31,6 @@ async function bootstrap() {
     httpsOptions: httpsOptions,
   });
 
-  app.getHttpServer().get('*', (request, response) => {
-    response.redirect('https://' + request.headers.host + request.url);
-  });
-  
   // Validation
   app.useGlobalPipes(new ValidationPipe());
 
