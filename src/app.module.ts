@@ -53,13 +53,7 @@ import { HttpsRedirectMiddleware } from './middleware/HttpsRedirectsMiddleware';
   providers: [AppService, AppResolver, DateScalar],
 })
 export class AppModule {
-  constructor(
-    private readonly config: ConfigService,
-  ){}
-
   configure(consumer: MiddlewareConsumer) {
-    if(process.env.PRODUCTION || this.config.get<String>('env') == 'prod') {
-      consumer.apply(HttpsRedirectMiddleware).forRoutes('*');
-    }
+    consumer.apply(HttpsRedirectMiddleware).forRoutes('*');
   }
 }
