@@ -1,5 +1,5 @@
 import { GraphQLModule } from '@nestjs/graphql';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './controllers/app.controller';
 import { AppService } from './services/app.service';
 import { AuthModule } from './resolvers/auth/auth.module';
@@ -15,6 +15,7 @@ import { ZonesController } from './controllers/zones.controller';
 import { RouteModule } from './resolvers/route/route.module';
 import { RoutesController } from './controllers/route.controller';
 import config from './configs/config';
+import { HttpsRedirectMiddleware } from './middleware/HttpsRedirectsMiddleware';
 
 @Module({
   imports: [
@@ -43,12 +44,16 @@ import config from './configs/config';
     RouteModule,
   ],
   controllers: [
-    AppController, 
-    AuthController, 
-    UserController, 
+    AppController,
+    AuthController,
+    UserController,
     ZonesController,
     RoutesController,
   ],
   providers: [AppService, AppResolver, DateScalar],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(HttpsRedirectMiddleware).forRoutes('*');
+  }
+}

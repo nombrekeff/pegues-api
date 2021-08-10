@@ -16,10 +16,10 @@ async function bootstrap() {
 
   if (env.NODE_ENV == 'production') {
     const keyFile = fs.readFileSync(__dirname + '/../ssl/pegues_com.key');
-    const bundleFile = fs.readFileSync(__dirname + '/../ssl/mis-pegues_com.ca-bundle');
-    const certFile = fs.readFileSync(
-      __dirname + '/../ssl/mis-pegues_com.crt',
+    const bundleFile = fs.readFileSync(
+      __dirname + '/../ssl/mis-pegues_com.ca-bundle'
     );
+    const certFile = fs.readFileSync(__dirname + '/../ssl/mis-pegues_com.crt');
     httpsOptions = {
       key: keyFile,
       cert: certFile,
@@ -31,6 +31,10 @@ async function bootstrap() {
     httpsOptions: httpsOptions,
   });
 
+  app.getHttpServer().get('*', (request, response) => {
+    response.redirect('https://' + request.headers.host + request.url);
+  });
+  
   // Validation
   app.useGlobalPipes(new ValidationPipe());
 
