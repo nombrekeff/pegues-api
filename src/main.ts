@@ -15,13 +15,15 @@ async function bootstrap() {
   let httpsOptions = {};
 
   if (env.NODE_ENV == 'production') {
-    const keyFile = fs.readFileSync(__dirname + '/../ssl/mis-pegues_com.p7b');
+    const keyFile = fs.readFileSync(__dirname + '/../ssl/mis-pegues_com.key');
+    const bundleFile = fs.readFileSync(__dirname + '/../ssl/mis-pegues_com.ca-bundle');
     const certFile = fs.readFileSync(
       __dirname + '/../ssl/mis-pegues_com.crt',
     );
     httpsOptions = {
       key: keyFile,
       cert: certFile,
+      ca: bundleFile,
     };
   }
 
