@@ -2,15 +2,32 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { env } from 'process';
 import { AppModule } from './app.module';
 import {
   CorsConfig,
   NestConfig,
   SwaggerConfig,
 } from './configs/config.interface';
+const fs = require('fs');
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  let httpsOptions = {};
+
+  if (env.NODE_ENV == 'production') {
+    const keyFile = fs.readFileSync(__dirname + '/../ssl/mis-pegues_com.p7b');
+    const certFile = fs.readFileSync(
+      __dirname + '/../ssl/mis-pegues_com.crt',
+    );
+    httpsOptions = {
+      key: keyFile,
+      cert: certFile,
+    };
+  }
+
+  const app = await NestFactory.create(AppModule, {
+    httpsOptions: httpsOptions,
+  });
 
   // Validation
   app.useGlobalPipes(new ValidationPipe());
