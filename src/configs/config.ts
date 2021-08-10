@@ -1,6 +1,7 @@
 import { Config } from './config.interface';
 
 const config: Config = {
+  env: 'pre',
   nest: {
     port: 3000,
   },

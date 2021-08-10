@@ -1,4 +1,5 @@
 export interface Config {
+  env: 'pre' | 'prod';
   nest: NestConfig;
   cors: CorsConfig;
   swagger: SwaggerConfig;
