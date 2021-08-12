@@ -29,6 +29,7 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule, {
     httpsOptions: httpsOptions,
+    logger: ['log', 'error', 'warn', 'debug'],
   });
 
   // Validation

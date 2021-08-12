@@ -17,7 +17,7 @@ export class UserService {
       include: {
         zones: true,
         routes: true,
-      },
+      }
     });
   }
 
