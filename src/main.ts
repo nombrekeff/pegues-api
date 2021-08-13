@@ -12,7 +12,7 @@ import {
 const fs = require('fs');
 
 async function bootstrap() {
-  let httpsOptions = {};
+  let httpsOptions;
 
   if (env.NODE_ENV == 'production') {
     const keyFile = fs.readFileSync(__dirname + '/../ssl/pegues_com.key');
@@ -28,8 +28,8 @@ async function bootstrap() {
   }
 
   const app = await NestFactory.create(AppModule, {
-    httpsOptions: httpsOptions,
     logger: ['log', 'error', 'warn', 'debug'],
+    httpsOptions: httpsOptions,
   });
 
   // Validation
@@ -57,6 +57,9 @@ async function bootstrap() {
     app.enableCors();
   }
 
-  await app.listen(process.env.PORT || nestConfig.port || 3000);
+  const port = process.env.PORT || nestConfig.port || 3000;
+  await app.listen(port);
+
+  console.log('Listening on port:', port);
 }
 bootstrap();

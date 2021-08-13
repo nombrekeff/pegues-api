@@ -17,7 +17,10 @@ export class UserService {
       include: {
         zones: true,
         routes: true,
-      }
+      },
+    }).then(user => {
+      delete user.password;
+      return user;
     });
   }
 

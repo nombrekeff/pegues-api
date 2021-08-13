@@ -5,12 +5,15 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { SortArgs } from 'src/models/args/sort.args';
+import { ValidZoneSortParams } from 'src/models/zone.model';
 import { CreateZoneInput } from 'src/resolvers/zone/dto/create-zone.input';
 import { ZonesService } from 'src/services/zones.service';
 
@@ -21,8 +24,8 @@ export class ZonesController {
   constructor(private readonly zoneService: ZonesService) {}
 
   @Get('')
-  async getMyZones(@CurrentUser() user: User) {
-    const zones = await this.zoneService.getZonesForUser(user.id);
+  async getMyZones(@CurrentUser() user: User, @Query() query: SortArgs<ValidZoneSortParams>) {
+    const zones = await this.zoneService.getZonesForUser(user.id, query);
     return zones;
   }
 

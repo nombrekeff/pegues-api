@@ -1,5 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { SortArgs } from 'src/models/args/sort.args';
+import { ValidZoneSortParams, Zone, zoneSortParams } from 'src/models/zone.model';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateZoneInput } from 'src/resolvers/zone/dto/create-zone.input';
 import { EditZoneInput } from 'src/resolvers/zone/dto/edit-zone.input';
@@ -8,14 +10,33 @@ import { EditZoneInput } from 'src/resolvers/zone/dto/edit-zone.input';
 export class ZonesService {
   constructor(private prisma: PrismaService) {}
 
-  getZonesForUser(userId: string) {
+  getZonesForUser(userId: string, sortArgs: SortArgs<ValidZoneSortParams> = {}) {
+    let { sortBy, sortDir }: SortArgs<ValidZoneSortParams> = {
+      sortBy: 'updatedAt',
+      sortDir: 'desc',
+      ...sortArgs,
+    };
+
+    if (!zoneSortParams.includes(sortBy as any)) {
+      sortBy = 'updatedAt';
+    }
+
+    if (sortDir !== 'desc' && sortDir !== 'asc') {
+      sortDir = 'desc';
+    }
+
     return this.prisma.zone.findMany({
       where: {
         authorId: userId,
       },
       include: {
         routes: true,
-      }
+      },
+      orderBy: [
+        {
+          [sortBy]: sortDir,
+        },
+      ],
     });
   }
 

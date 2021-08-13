@@ -1,5 +1,10 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Injectable, Logger } from '@nestjs/common';
+import { SortArgs } from 'src/models/args/sort.args';
+import {
+  Route,
+  routeSortParams,
+  ValidRouteSortParams,
+} from 'src/models/route.model';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateRouteInput } from 'src/resolvers/route/dto/create-route.input';
 import { UpdateRouteInput } from 'src/resolvers/route/dto/update-route.input';
@@ -10,15 +15,38 @@ export class RoutesService {
 
   constructor(private prisma: PrismaService) {}
 
-  getRoutesForUser(userId: string) {
-    return this.prisma.route.findMany({
+  async getRoutesForUser(
+    userId: string,
+    sortArgs: SortArgs<ValidRouteSortParams> = {}
+  ) {
+    let { sortBy, sortDir }: SortArgs<ValidRouteSortParams> = {
+      sortBy: 'updatedAt',
+      sortDir: 'desc',
+      ...sortArgs,
+    };
+
+    if (!routeSortParams.includes(sortBy as any)) {
+      sortBy = 'updatedAt';
+    }
+
+    if (sortDir !== 'desc' && sortDir !== 'asc') {
+      sortDir = 'desc';
+    }
+
+    const routes = await this.prisma.route.findMany({
       where: {
         authorId: userId,
       },
       include: {
         zone: true,
       },
+      orderBy: [
+        {
+          [sortBy]: sortDir,
+        },
+      ],
     });
+    return routes;
   }
 
   async createRoute(userId: string, routeData: CreateRouteInput) {

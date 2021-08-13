@@ -1,6 +1,6 @@
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { User } from './user.model';
-import { BaseModel } from './base.model';
+import { BaseModel, ValidBaseSortParams } from './base.model';
 import { Zone } from './zone.model';
 
 export enum Grade {
@@ -38,6 +38,18 @@ registerEnumType(Grade, {
   name: 'Grade',
   description: 'Route grade',
 });
+
+export const routeSortParams = <const>[
+  'name',
+  'description',
+  'zone',
+  'grade',
+  'ascentAt',
+  'sessions',
+  'tries',
+];
+type RouteSortParams = typeof routeSortParams[number];
+export type ValidRouteSortParams = RouteSortParams | ValidBaseSortParams;
 
 @ObjectType()
 export class Route extends BaseModel {
