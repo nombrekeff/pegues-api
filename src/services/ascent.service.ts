@@ -2,8 +2,11 @@ import { HttpStatus } from '@nestjs/common';
 import { Injectable, Logger } from '@nestjs/common';
 import { HttpException } from '@nestjs/common/exceptions';
 import { Prisma } from '@prisma/client';
+import { searchByQuery } from 'src/common/common_queries';
 import { ErrorCodes } from 'src/common/error_codes';
 import { SortHelper } from 'src/common/sort_helper';
+import { AscentQueryArgs } from 'src/models/args/ascent-query.args';
+import { QueryAllArgs } from 'src/models/args/query-all.args';
 import { SortArgs } from 'src/models/args/sort.args';
 import {
   ascentSortParams,
@@ -19,38 +22,35 @@ export class AscentService {
 
   constructor(private prisma: PrismaService) {}
 
-  async getAllForUser(
-    authorId: string,
-    sortArgs: SortArgs<ValidAscentSortParams> = {}
-  ) {
-    return this._getAllWhere({ authorId }, sortArgs);
+  async getAllForUser(authorId: string, params: AscentQueryArgs = {}) {
+    return this._getAllWhere({ authorId }, params);
   }
 
   async getAllForRoute(
+    authorId: string,
     routeId: string,
-    sortArgs: SortArgs<ValidAscentSortParams> = {}
+    params: AscentQueryArgs = {}
   ) {
-    return this._getAllWhere({ routeId }, sortArgs);
+    return this._getAllWhere({ routeId, authorId }, params);
   }
 
-  async getAllForZone(
-    zoneId: string,
-    sortArgs: SortArgs<ValidAscentSortParams> = {}
-  ) {
-    return this._getAllWhere({ route: { zone: { id: zoneId } } }, sortArgs);
+  async getAllForZone(zoneId: string, params: AscentQueryArgs = {}) {
+    return this._getAllWhere({ route: { zone: { id: zoneId } } }, params);
   }
 
-  private async _getAllWhere(
-    where: any,
-    sortParams: SortArgs<ValidAscentSortParams> = {}
-  ) {
+  private async _getAllWhere(where: any, params: AscentQueryArgs = {}) {
     const { sortBy, sortDir } = SortHelper.safeSortParams(
-      sortParams,
+      params,
       ascentSortParams
     );
 
-    const routes = await this.prisma.ascent.findMany({
-      where: where,
+    const ascents = await this.prisma.ascent.findMany({
+      where: {
+        ...where,
+        route: {
+          ...searchByQuery('name', params.search),
+        },
+      },
       include: {
         route: true,
       },
@@ -58,7 +58,8 @@ export class AscentService {
         [sortBy]: sortDir,
       },
     });
-    return routes;
+
+    return ascents;
   }
 
   async create(userId: string, data: CreateAscentInput) {

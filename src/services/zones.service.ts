@@ -1,13 +1,9 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { searchByQuery } from 'src/common/common_queries';
 import { SortHelper } from 'src/common/sort_helper';
-import { QueryAllArgs } from 'src/models/args/query-all.args';
-import { SortArgs } from 'src/models/args/sort.args';
-import {
-  ValidZoneSortParams,
-  Zone,
-  zoneSortParams,
-} from 'src/models/zone.model';
+import { ZoneQueryArgs } from 'src/models/args/zone-query.args';
+import { zoneSortParams } from 'src/models/zone.model';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateZoneInput } from 'src/resolvers/zone/dto/create-zone.input';
 import { EditZoneInput } from 'src/resolvers/zone/dto/edit-zone.input';
@@ -16,10 +12,7 @@ import { EditZoneInput } from 'src/resolvers/zone/dto/edit-zone.input';
 export class ZonesService {
   constructor(private prisma: PrismaService) {}
 
-  getZonesForUser(
-    userId: string,
-    params: QueryAllArgs<ValidZoneSortParams> = {}
-  ) {
+  getZonesForUser(userId: string, params: ZoneQueryArgs = {}) {
     const { sortBy, sortDir } = SortHelper.safeSortParams(
       params,
       zoneSortParams
@@ -28,10 +21,7 @@ export class ZonesService {
     return this.prisma.zone.findMany({
       where: {
         authorId: userId,
-        name: {
-          startsWith: params.search,
-          mode: 'insensitive',
-        },
+        ...searchByQuery('name', params.search),
       },
       include: {
         routes: true,

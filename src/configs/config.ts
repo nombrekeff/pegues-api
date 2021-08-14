@@ -1,7 +1,8 @@
 import { Config } from './config.interface';
 
-const config: Config = {
+export const config: Config = {
   env: 'pre',
+  docsUrl: 'https://mis-pegues.com/api',
   nest: {
     port: 3000,
   },

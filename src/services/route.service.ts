@@ -15,6 +15,8 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateRouteInput } from 'src/resolvers/route/dto/create-route.input';
 import { UpdateRouteInput } from 'src/resolvers/route/dto/update-route.input';
+import { searchByQuery } from 'src/common/common_queries';
+import { RouteQueryArgs } from 'src/models/args/route-query.args';
 
 @Injectable()
 export class RoutesService {
@@ -22,10 +24,7 @@ export class RoutesService {
 
   constructor(private prisma: PrismaService) {}
 
-  async getRoutesForUser(
-    userId: string,
-    params: QueryAllArgs<ValidRouteSortParams> = {}
-  ) {
+  async getAllForUser(userId: string, params: RouteQueryArgs = {}) {
     const { sortBy, sortDir } = SortHelper.safeSortParams(
       params,
       routeSortParams
@@ -36,20 +35,17 @@ export class RoutesService {
         where: {
           AND: {
             authorId: userId,
+            ...(params.zoneId
+              ? {
+                  zoneId: params.zoneId,
+                }
+              : {}),
           },
           OR: [
-            {
-              name: {
-                startsWith: params.search,
-                mode: 'insensitive',
-              },
-            },
+            searchByQuery('name', params.search),
             {
               zone: {
-                name: {
-                  startsWith: params.search,
-                  mode: 'insensitive',
-                },
+                ...searchByQuery('name', params.search),
               },
             },
           ],
@@ -121,7 +117,7 @@ export class RoutesService {
         },
         data: {
           name: routeData.name,
-          grade: routeData.grade,
+          grade: routeData.grade as any,
           description: routeData.description,
           zoneId: routeData.zoneId,
         },

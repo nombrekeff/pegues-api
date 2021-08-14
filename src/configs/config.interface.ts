@@ -5,6 +5,7 @@ export interface Config {
   swagger: SwaggerConfig;
   graphql: GraphqlConfig;
   security: SecurityConfig;
+  docsUrl: string;
 }
 
 export interface NestConfig {
