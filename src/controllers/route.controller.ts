@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import {  ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { AscentQueryArgs } from 'src/models/args/ascent-query.args';
@@ -37,7 +37,7 @@ export class RoutesController {
   @Get(':id/ascents')
   async getAscentsForRoute(
     @CurrentUser() user: User,
-    @Param('id')  routeId: string,
+    @Param('id') routeId: string,
     @Query() query: AscentQueryArgs
   ) {
     return this.ascentService.getAllForUser(user.id, { ...query, routeId });
@@ -49,7 +49,11 @@ export class RoutesController {
   }
 
   @Put(':id')
-  async editRoute(@Param('id') id: string, @Body() data: UpdateRouteInput) {
-    return this.routeService.updateRoute(id, data);
+  async editRoute(
+    @CurrentUser() user: User,
+    @Param('id') id: string,
+    @Body() data: UpdateRouteInput
+  ) {
+    return this.routeService.updateRoute(user.id, id, data);
   }
 }

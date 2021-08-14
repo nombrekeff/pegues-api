@@ -35,7 +35,6 @@ async function bootstrap() {
 
   // Validation
   app.useGlobalPipes(new ValidationPipe());
-  // app.useGlobalGuards(new RolesGuard());
 
   const configService = app.get(ConfigService);
   const nestConfig = configService.get<NestConfig>('nest');

@@ -13,7 +13,7 @@ Table User {
   zones Zone [not null]
   routes Route [not null]
   ascents Ascent [not null]
-  role Role [not null]
+  roles Role [not null]
   preferences UserPreferences
 }
 
@@ -23,8 +23,13 @@ Table Zone {
   updatedAt DateTime [not null]
   name String [not null]
   author User
-  authorId String
+  authorId String [not null]
   routes Route [not null]
+  type String [not null, default: 'outdoors']
+
+  indexes {
+    (authorId, id) [unique]
+  }
 }
 
 Table Route {
@@ -40,6 +45,10 @@ Table Route {
   zone Zone
   zoneId String
   ascents Ascent [not null]
+
+  indexes {
+    (authorId, id) [unique]
+  }
 }
 
 Table Ascent {
@@ -53,6 +62,10 @@ Table Ascent {
   ascentAt DateTime
   sessions Int [not null, default: 0]
   tries Int [not null, default: 0]
+
+  indexes {
+    (authorId, id) [unique]
+  }
 }
 
 Table UserPreferences {
@@ -62,6 +75,10 @@ Table UserPreferences {
   preferredDiscipline RouteDiscipline [not null, default: 'lead']
   author User
   authorId String
+
+  indexes {
+    (authorId, id) [unique]
+  }
 }
 
 Enum Role {

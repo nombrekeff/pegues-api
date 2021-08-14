@@ -9,19 +9,19 @@ async function main() {
 
   const user1 = await prisma.user.create({
     data: {
-      email: 'lisa@simpson.com',
-      firstname: 'Lisa',
-      lastname: 'Simpson',
+      email: 'user@edge.com',
+      firstname: 'Manolo',
+      lastname: 'Edge',
       password: '$2b$10$EpRnTzVlqHNP0.fUbXUwSOyuiXe/QLSUG6xNekdHgTGmrpHEfIoxm', // secret42
-      role: 'USER',
+      roles: ['USER'],
     },
   });
   const user2 = await prisma.user.create({
     data: {
-      email: 'bart@simpson.com',
-      firstname: 'Bart',
-      lastname: 'Simpson',
-      role: 'ADMIN',
+      email: 'admin@edge.com',
+      firstname: 'manolo',
+      lastname: 'admin',
+      roles: ['ADMIN'],
       password: '$2b$10$EpRnTzVlqHNP0.fUbXUwSOyuiXe/QLSUG6xNekdHgTGmrpHEfIoxm', // secret42
     },
   });

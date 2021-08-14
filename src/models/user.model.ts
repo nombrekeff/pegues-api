@@ -1,4 +1,3 @@
-import { ObjectType, registerEnumType, HideField } from '@nestjs/graphql';
 import { BaseModel } from './base.model';
 import { Zone } from './zone.model';
 import { Route } from './route.model';
@@ -11,12 +10,6 @@ export enum Role {
   USER = 'USER',
 }
 
-registerEnumType(Role, {
-  name: 'Role',
-  description: 'User role',
-});
-
-@ObjectType()
 export class User extends BaseModel {
   @ApiProperty()
   email: string;
@@ -31,7 +24,7 @@ export class User extends BaseModel {
   preferences: UserPreferences;
 
   @ApiProperty()
-  role: Role;
+  roles: Role[];
 
   @ApiProperty()
   zones: Zone[];
@@ -42,6 +35,5 @@ export class User extends BaseModel {
   @ApiProperty()
   ascents: Ascent[];
 
-  @HideField()
   password: string;
 }
