@@ -13,6 +13,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { QueryAllArgs } from 'src/models/args/query-all.args';
 import { SortArgs } from 'src/models/args/sort.args';
 import { ValidRouteSortParams } from 'src/models/route.model';
 import { CreateRouteInput } from 'src/resolvers/route/dto/create-route.input';
@@ -30,7 +31,7 @@ export class RoutesController {
   @Get('')
   async getMyRoutes(
     @CurrentUser() user: User,
-    @Query() query: SortArgs<ValidRouteSortParams>
+    @Query() query: QueryAllArgs<ValidRouteSortParams>
   ) {
     return this.routeService.getRoutesForUser(user.id, query);
   }

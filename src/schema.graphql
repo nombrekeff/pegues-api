@@ -94,6 +94,7 @@ type Route {
   """Identifies the date and time when the object was created."""
   createdAt: Date!
   description: String!
+  discipline: RouteDiscipline!
   grade: Grade!
   id: ID!
   name: String!
@@ -101,6 +102,15 @@ type Route {
   """Identifies the date and time when the object was last updated."""
   updatedAt: Date!
   zone: Zone!
+}
+
+"""Route discipline"""
+enum RouteDiscipline {
+  boulder
+  dws
+  lead
+  other
+  trad
 }
 
 input SignupInput {

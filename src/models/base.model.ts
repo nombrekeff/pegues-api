@@ -1,5 +1,6 @@
 import { Field, ObjectType, ID } from '@nestjs/graphql';
-const baseSortParams = <const>['id', 'createdAt', 'updatedAt'];
+
+export const baseSortParams = <const>['id', 'createdAt', 'updatedAt'];
 export type ValidBaseSortParams = typeof baseSortParams[number];
 
 @ObjectType({ isAbstract: true })

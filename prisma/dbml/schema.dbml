@@ -33,6 +33,7 @@ Table Route {
   name String [not null]
   description String
   grade Grade [not null, default: 'uknown']
+  discipline RouteDiscipline [not null, default: 'other']
   author User
   authorId String
   zone Zone
@@ -56,6 +57,14 @@ Table Ascent {
 Enum Role {
   ADMIN
   USER
+}
+
+Enum RouteDiscipline {
+  lead
+  boulder
+  trad
+  dws
+  other
 }
 
 Enum Grade {

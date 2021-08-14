@@ -37,12 +37,13 @@ model Zone {
 }
 
 model Route {
-  id          String    @id @default(cuid())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id          String     @id @default(cuid())
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
   name        String   
   description String?   
-  grade       Grade     @default(uknown)
+  grade       Grade           @default(uknown)
+  discipline  RouteDiscipline @default(other)
 
 
   author      User?     @relation(fields: [authorId], references: [id])
@@ -74,6 +75,15 @@ enum Role {
   ADMIN
   USER
 }
+
+ enum RouteDiscipline {
+  lead
+  boulder
+  trad
+  dws
+  other
+}
+
 
 enum Grade {
   uknown

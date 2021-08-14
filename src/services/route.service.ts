@@ -1,8 +1,11 @@
+import { Grade } from './../models/route.model';
 import { BadRequestException, HttpStatus } from '@nestjs/common';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConflictException, HttpException } from '@nestjs/common/exceptions';
 import { Prisma } from '@prisma/client';
 import { ErrorCodes } from 'src/common/error_codes';
+import { SortHelper } from 'src/common/sort_helper';
+import { QueryAllArgs } from 'src/models/args/query-all.args';
 import { SortArgs } from 'src/models/args/sort.args';
 import {
   Route,
@@ -21,52 +24,62 @@ export class RoutesService {
 
   async getRoutesForUser(
     userId: string,
-    sortArgs: SortArgs<ValidRouteSortParams> = {}
+    params: QueryAllArgs<ValidRouteSortParams> = {}
   ) {
-    let { sortBy, sortDir }: SortArgs<ValidRouteSortParams> = {
-      sortBy: 'updatedAt',
-      sortDir: 'desc',
-      ...sortArgs,
-    };
+    const { sortBy, sortDir } = SortHelper.safeSortParams(
+      params,
+      routeSortParams
+    );
 
-    if (!routeSortParams.includes(sortBy as any)) {
-      sortBy = 'updatedAt';
-    }
-
-    if (sortDir !== 'desc' && sortDir !== 'asc') {
-      sortDir = 'desc';
-    }
-
-    const routes = await this.prisma.route.findMany({
-      where: {
-        authorId: userId,
-      },
-      include: {
-        zone: true,
-        ascents: true,
-      },
-      orderBy: [
-        {
+    const routes = await this.prisma.route
+      .findMany({
+        where: {
+          AND: {
+            authorId: userId,
+          },
+          OR: [
+            {
+              name: {
+                startsWith: params.search,
+                mode: 'insensitive',
+              },
+            },
+            {
+              zone: {
+                name: {
+                  startsWith: params.search,
+                  mode: 'insensitive',
+                },
+              },
+            },
+          ],
+        },
+        include: {
+          zone: true,
+          ascents: true,
+        },
+        orderBy: {
           [sortBy]: sortDir,
         },
-      ],
-    }).then(async (routes) => {
-      const withCount = [];
-      for (const route of routes) {
-        const count = await this.prisma.ascent.count({
-          where: {
-            routeId: route.id,
-          }
-        });
+      })
+      .then(async (routes) => {
+        const withCount = [];
 
-        withCount.push({
-          ...route,
-          ascentCount: count,
-        });
-      }
+        for (const route of routes) {
+          const count = await this.prisma.ascent.count({
+            where: {
+              routeId: route.id,
+            },
+          });
 
-      return withCount;
-    });
+          withCount.push({
+            ...route,
+            ascentCount: count,
+          });
+        }
+
+        return withCount;
+      });
 
     return routes;
   }
