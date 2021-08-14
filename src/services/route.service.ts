@@ -1,4 +1,8 @@
+import { BadRequestException, HttpStatus } from '@nestjs/common';
 import { Injectable, Logger } from '@nestjs/common';
+import { ConflictException, HttpException } from '@nestjs/common/exceptions';
+import { Prisma } from '@prisma/client';
+import { ErrorCodes } from 'src/common/error_codes';
 import { SortArgs } from 'src/models/args/sort.args';
 import {
   Route,
@@ -50,12 +54,32 @@ export class RoutesService {
   }
 
   async createRoute(userId: string, routeData: CreateRouteInput) {
-    return await this.prisma.route.create({
-      data: {
-        authorId: userId,
-        ...routeData,
-      },
-    });
+    try {
+      const route = await this.prisma.route.create({
+        data: {
+          //  Spread out like this to avoid errors if invalid arguments are passed in
+          authorId: userId,
+          name: routeData.name,
+          grade: routeData.grade,
+          description: routeData.description,
+          tries: routeData.tries,
+          sessions: routeData.sessions,
+        },
+      });
+      return route;
+    } catch (e) {
+      if (
+        e instanceof Prisma.PrismaClientKnownRequestError &&
+        e.code == ErrorCodes.notFound
+      ) {
+        throw new HttpException(
+          `Zone '${routeData.zoneId}' not found.`,
+          HttpStatus.BAD_REQUEST
+        );
+      } else {
+        throw new Error(e);
+      }
+    }
   }
 
   async updateRoute(id: string, routeData: UpdateRouteInput) {
@@ -64,7 +88,13 @@ export class RoutesService {
         where: {
           id: id,
         },
-        data: { ...routeData },
+        data: {
+          name: routeData.name,
+          grade: routeData.grade,
+          description: routeData.description,
+          tries: routeData.tries,
+          sessions: routeData.sessions,
+        },
       });
       return route;
     } catch (e) {

@@ -35,7 +35,6 @@ Table Route {
   ascentAt DateTime
   sessions Int [not null, default: 0]
   tries Int [not null, default: 0]
-  hasAscent Boolean [default: false]
   author User
   authorId String
   zone Zone
