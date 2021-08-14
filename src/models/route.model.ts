@@ -3,6 +3,7 @@ import { User } from './user.model';
 import { BaseModel, baseSortParams, ValidBaseSortParams } from './base.model';
 import { Zone } from './zone.model';
 import { Ascent } from './ascent.model';
+import { ApiProperty } from '@nestjs/swagger';
 
 export enum Grade {
   uknown = '?',
@@ -65,13 +66,24 @@ export type ValidRouteSortParams = typeof routeSortParams[number];
 
 @ObjectType()
 export class Route extends BaseModel {
+  @ApiProperty()
   name: string;
+
+  @ApiProperty()
   description: string;
 
+  @ApiProperty({ type: () => User })
   author: User;
+
+  @ApiProperty({ type: () => Zone })
   zone: Zone;
 
+  @ApiProperty({ type: () => Ascent, isArray: true })
   ascents: Ascent[] = [];
-  grade: Grade = Grade.uknown;
+
+  @ApiProperty({ enum: Grade, default: Grade.uknown })
+  grade?: Grade | null = Grade.uknown;
+
+  @ApiProperty({ enum: RouteDiscipline, default: RouteDiscipline.other })
   discipline: RouteDiscipline = RouteDiscipline.other;
 }

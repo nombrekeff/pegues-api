@@ -9,6 +9,7 @@ import {
   NestConfig,
   SwaggerConfig,
 } from './configs/config.interface';
+import { RolesGuard } from './guards/roles.guard';
 const fs = require('fs');
 
 async function bootstrap() {
@@ -34,6 +35,7 @@ async function bootstrap() {
 
   // Validation
   app.useGlobalPipes(new ValidationPipe());
+  // app.useGlobalGuards(new RolesGuard());
 
   const configService = app.get(ConfigService);
   const nestConfig = configService.get<NestConfig>('nest');

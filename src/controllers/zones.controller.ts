@@ -9,11 +9,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { RouteQueryArgs } from 'src/models/args/route-query.args';
 import { ZoneQueryArgs } from 'src/models/args/zone-query.args';
+import { Zone } from 'src/models/zone.model';
 import { CreateZoneInput } from 'src/resolvers/zone/dto/create-zone.input';
 import { RoutesService } from 'src/services/route.service';
 import { ZonesService } from 'src/services/zones.service';
@@ -29,6 +30,7 @@ export class ZonesController {
   ) {}
 
   @Get('')
+  @ApiResponse({ type: () => Zone, isArray: true, status: 200 })
   async getMyZones(@CurrentUser() user: User, @Query() query: ZoneQueryArgs) {
     const zones = await this.zoneService.getZonesForUser(user.id, query);
     return zones;

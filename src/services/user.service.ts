@@ -18,6 +18,7 @@ export class UserService {
         include: {
           zones: false,
           routes: false,
+          preferences: true,
         },
       })
       .then(async (user) => {

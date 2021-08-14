@@ -95,7 +95,7 @@ type Route {
   createdAt: Date!
   description: String!
   discipline: RouteDiscipline!
-  grade: Grade!
+  grade: Grade
   id: ID!
   name: String!
 
@@ -148,6 +148,10 @@ type User {
   """Identifies the date and time when the object was last updated."""
   updatedAt: Date!
   zones: [Zone!]!
+}
+
+type UserPreferences {
+  preferedDiscipline: RouteDiscipline!
 }
 
 type Zone {

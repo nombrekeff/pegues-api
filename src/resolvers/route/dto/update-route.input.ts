@@ -14,11 +14,6 @@ export class UpdateRouteInput {
   @ApiProperty()
   zoneId?: string;
 
-  @IsEnum(Grade, {
-    message: (args) => {
-      return `Invalid grade ${args.value}. See wiki page for info, here: ${config.docsUrl}/#/routes`;
-    },
-  })
   @IsOptional()
   @ApiProperty({ enum: Grade, default: Grade.uknown })
   grade?: Grade | null;

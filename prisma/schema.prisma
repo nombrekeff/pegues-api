@@ -13,17 +13,18 @@ generator dbml {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  email     String   @unique
-  password  String   
-  firstname String?
-  lastname  String?
-  zones     Zone[]
-  routes    Route[]
-  ascents   Ascent[]
-  role      Role
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  email       String   @unique
+  password    String   
+  firstname   String?
+  lastname    String?
+  zones       Zone[]
+  routes      Route[]
+  ascents     Ascent[]
+  role        Role
+  preferences UserPreferences?
 }
 
 model Zone {
@@ -71,6 +72,16 @@ model Ascent {
   tries       Int       @default(0)
 }
 
+model UserPreferences {
+  id                  String   @id @default(cuid())
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  preferredDiscipline RouteDiscipline @default(lead)
+
+  author    User?     @relation(fields: [authorId], references: [id])
+  authorId  String?
+}
+
 enum Role {
   ADMIN
   USER
@@ -86,7 +97,7 @@ enum Role {
 
 
 enum Grade {
-  uknown
+  uknown  
   g3
   g4
   g5

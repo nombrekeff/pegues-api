@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { User } from 'src/models/user.model';
 import { UserService } from 'src/services/user.service';
@@ -16,6 +16,7 @@ export class UserController {
   ) {}
 
   @Get('me')
+  @ApiResponse({ type: User })
   async getUser(@CurrentUser() user: User) {
     return this.userService.findUser(user.id);
   }
