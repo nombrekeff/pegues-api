@@ -1,9 +1,12 @@
+import { UpdateAscentInput } from './../models/dto/update_ascent.dto';
+import { CreateAscentInput } from './../models/dto/create_ascent.dto';
 import { BadRequestException, HttpStatus } from '@nestjs/common';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConflictException, HttpException } from '@nestjs/common/exceptions';
 import { Prisma } from '@prisma/client';
 import { ErrorCodes } from 'src/common/error_codes';
 import { SortArgs } from 'src/models/args/sort.args';
+import { ValidAscentSortParams } from 'src/models/ascent.model';
 import {
   Route,
   routeSortParams,
@@ -14,16 +17,16 @@ import { CreateRouteInput } from 'src/resolvers/route/dto/create-route.input';
 import { UpdateRouteInput } from 'src/resolvers/route/dto/update-route.input';
 
 @Injectable()
-export class RoutesService {
-  private readonly logger = new Logger('routes');
+export class AscentService {
+  private readonly logger = new Logger('ascent');
 
   constructor(private prisma: PrismaService) {}
 
-  async getRoutesForUser(
+  async getAllForUser(
     userId: string,
-    sortArgs: SortArgs<ValidRouteSortParams> = {}
+    sortArgs: SortArgs<ValidAscentSortParams> = {}
   ) {
-    let { sortBy, sortDir }: SortArgs<ValidRouteSortParams> = {
+    let { sortBy, sortDir }: SortArgs<ValidAscentSortParams> = {
       sortBy: 'updatedAt',
       sortDir: 'desc',
       ...sortArgs,
@@ -37,51 +40,31 @@ export class RoutesService {
       sortDir = 'desc';
     }
 
-    const routes = await this.prisma.route.findMany({
+    const routes = await this.prisma.ascent.findMany({
       where: {
         authorId: userId,
       },
       include: {
-        zone: true,
-        ascents: true,
+        route: true,
       },
       orderBy: [
         {
           [sortBy]: sortDir,
         },
       ],
-    }).then(async (routes) => {
-      const withCount = [];
-      for (const route of routes) {
-        const count = await this.prisma.ascent.count({
-          where: {
-            routeId: route.id,
-          }
-        });
-
-        withCount.push({
-          ...route,
-          ascentCount: count,
-        });
-      }
-
-      return withCount;
     });
-
     return routes;
   }
 
-  async createRoute(userId: string, routeData: CreateRouteInput) {
+  async create(userId: string, data: CreateAscentInput) {
     try {
-      const route = await this.prisma.route.create({
+      const route = await this.prisma.ascent.create({
         data: {
-          //  Spread out like this to avoid errors if invalid arguments are passed in
           authorId: userId,
-          zoneId: routeData.zoneId,
-          name: routeData.name,
-          grade: routeData.grade,
-          description: routeData.description,
-          // TODO: create ascent if passed in
+          routeId: data.routeId,
+          ascentAt: data.ascentAt,
+          sessions: data.sessions,
+          tries: data.tries,
         },
       });
       return route;
@@ -91,7 +74,7 @@ export class RoutesService {
         e.code == ErrorCodes.notFound
       ) {
         throw new HttpException(
-          `Zone '${routeData.zoneId}' not found.`,
+          `Route '${data.routeId}' not found.`,
           HttpStatus.BAD_REQUEST
         );
       } else {
@@ -100,17 +83,17 @@ export class RoutesService {
     }
   }
 
-  async updateRoute(id: string, routeData: UpdateRouteInput) {
+  async update(id: string, data: UpdateAscentInput) {
     try {
-      const route = await this.prisma.route.update({
+      const route = await this.prisma.ascent.update({
         where: {
           id: id,
         },
         data: {
-          name: routeData.name,
-          grade: routeData.grade,
-          description: routeData.description,
-          zoneId: routeData.zoneId,
+          routeId: data.routeId,
+          ascentAt: data.ascentAt,
+          sessions: data.sessions,
+          tries: data.tries,
         },
       });
       return route;

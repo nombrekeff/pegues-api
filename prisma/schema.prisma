@@ -22,6 +22,7 @@ model User {
   lastname  String?
   zones     Zone[]
   routes    Route[]
+  ascents   Ascent[]
   role      Role
 }
 
@@ -29,7 +30,7 @@ model Zone {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  name      String   @unique
+  name      String   
   author    User?    @relation(fields: [authorId], references: [id])
   authorId  String?
   routes    Route[]
@@ -43,15 +44,30 @@ model Route {
   description String?   
   grade       Grade     @default(uknown)
 
-  ascentAt    DateTime?
-  sessions    Int       @default(0)
-  tries       Int       @default(0)
 
   author      User?     @relation(fields: [authorId], references: [id])
   authorId    String?
 
   zone        Zone?     @relation(fields: [zoneId], references: [id])
   zoneId      String?
+
+  ascents     Ascent[]
+}
+
+model Ascent {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  route        Route?   @relation(fields: [routeId], references: [id])
+  routeId      String
+
+  author      User?     @relation(fields: [authorId], references: [id])
+  authorId    String?
+
+  ascentAt    DateTime?
+  sessions    Int       @default(0)
+  tries       Int       @default(0)
 }
 
 enum Role {

@@ -2,6 +2,21 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Ascent {
+  ascentAt: Date!
+  author: User!
+
+  """Identifies the date and time when the object was created."""
+  createdAt: Date!
+  id: ID!
+  route: Route!
+  sessions: Int!
+  tries: Int!
+
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: Date!
+}
+
 type Auth {
   """JWT access token"""
   accessToken: String!
@@ -73,7 +88,7 @@ enum Role {
 }
 
 type Route {
-  ascentAt: Date!
+  ascents: [Ascent!]!
   author: User!
 
   """Identifies the date and time when the object was created."""
@@ -82,8 +97,6 @@ type Route {
   grade: Grade!
   id: ID!
   name: String!
-  sessions: Int!
-  tries: Int!
 
   """Identifies the date and time when the object was last updated."""
   updatedAt: Date!
@@ -111,6 +124,8 @@ input UpdateUserInput {
 }
 
 type User {
+  ascents: [Ascent!]!
+
   """Identifies the date and time when the object was created."""
   createdAt: Date!
   email: String!

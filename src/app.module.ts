@@ -1,3 +1,4 @@
+import { AscentModule } from './resolvers/ascent/ascent.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './controllers/app.controller';
@@ -16,6 +17,8 @@ import { RouteModule } from './resolvers/route/route.module';
 import { RoutesController } from './controllers/route.controller';
 import config from './configs/config';
 import { HttpsRedirectMiddleware } from './middleware/HttpsRedirectsMiddleware';
+import { AscentController } from './controllers/ascent.controller';
+import { AscentService } from './services/ascent.service';
 
 @Module({
   imports: [
@@ -42,6 +45,7 @@ import { HttpsRedirectMiddleware } from './middleware/HttpsRedirectsMiddleware';
     UserModule,
     ZoneModule,
     RouteModule,
+    AscentModule,
   ],
   controllers: [
     AppController,
@@ -49,6 +53,7 @@ import { HttpsRedirectMiddleware } from './middleware/HttpsRedirectsMiddleware';
     UserController,
     ZonesController,
     RoutesController,
+    AscentController,
   ],
   providers: [AppService, AppResolver, DateScalar],
 })

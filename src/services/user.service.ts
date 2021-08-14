@@ -12,16 +12,34 @@ export class UserService {
   ) {}
 
   findUser(userId: string) {
-    return this.prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        zones: true,
-        routes: true,
-      },
-    }).then(user => {
-      delete user.password;
-      return user;
-    });
+    return this.prisma.user
+      .findUnique({
+        where: { id: userId },
+        include: {
+          zones: false,
+          routes: false,
+        },
+      })
+      .then(async (user) => {
+        const whereAuthorIsUser = {
+          where: {
+            authorId: user.id,
+          },
+        };
+
+        const ascentCount = await this.prisma.ascent.count(whereAuthorIsUser);
+        const routeCount = await this.prisma.route.count(whereAuthorIsUser);
+        const zoneCount = await this.prisma.zone.count(whereAuthorIsUser);
+
+        delete user.password;
+
+        return {
+          ...user,
+          ascentCount,
+          routeCount,
+          zoneCount,
+        };
+      });
   }
 
   updateUser(userId: string, newUserData: UpdateUserInput) {
