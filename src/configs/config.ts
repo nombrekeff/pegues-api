@@ -11,8 +11,8 @@ export const config: Config = {
   },
   swagger: {
     enabled: true,
-    title: 'Nestjs FTW',
-    description: 'The nestjs API description',
+    title: 'Pegues API',
+    description: 'Pegues API description, list of requests, models, etc...',
     version: '1.5',
     path: 'api',
   },
