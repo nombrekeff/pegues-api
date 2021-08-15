@@ -13,26 +13,34 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
-import { SortArgs } from 'src/models/args/sort.args';
-import { ValidRouteSortParams } from 'src/models/route.model';
+import { AscentQueryArgs } from 'src/models/args/ascent-query.args';
+import { RouteQueryArgs } from 'src/models/args/route-query.args';
 import { CreateRouteInput } from 'src/resolvers/route/dto/create-route.input';
 import { UpdateRouteInput } from 'src/resolvers/route/dto/update-route.input';
+import { AscentService } from 'src/services/ascent.service';
 import { RoutesService } from 'src/services/route.service';
-
-
 
 @Controller('routes')
 @ApiTags('routes')
 @UseGuards(AuthGuard('jwt'))
 export class RoutesController {
-  constructor(private readonly routeService: RoutesService) {}
+  constructor(
+    private readonly routeService: RoutesService,
+    private readonly ascentService: AscentService
+  ) {}
 
   @Get('')
-  async getMyRoutes(
+  async getMyRoutes(@CurrentUser() user: User, @Query() query: RouteQueryArgs) {
+    return this.routeService.getAllForUser(user.id, query);
+  }
+
+  @Get(':id/ascents')
+  async getAscentsForRoute(
     @CurrentUser() user: User,
-    @Query() query: SortArgs<ValidRouteSortParams>
+    @Param('id') routeId: string,
+    @Query() query: AscentQueryArgs
   ) {
-    return this.routeService.getRoutesForUser(user.id, query);
+    return this.ascentService.getAllForUser(user.id, { ...query, routeId });
   }
 
   @Post('')
@@ -41,7 +49,11 @@ export class RoutesController {
   }
 
   @Put(':id')
-  async editRoute(@Param('id') id: string, @Body() data: UpdateRouteInput) {
-    return this.routeService.updateRoute(id, data);
+  async editRoute(
+    @CurrentUser() user: User,
+    @Param('id') id: string,
+    @Body() data: UpdateRouteInput
+  ) {
+    return this.routeService.updateRoute(user.id, id, data);
   }
 }

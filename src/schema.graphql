@@ -2,6 +2,21 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Ascent {
+  ascentAt: Date!
+  author: User!
+
+  """Identifies the date and time when the object was created."""
+  createdAt: Date!
+  id: ID!
+  route: Route!
+  sessions: Int!
+  tries: Int!
+
+  """Identifies the date and time when the object was last updated."""
+  updatedAt: Date!
+}
+
 type Auth {
   """JWT access token"""
   accessToken: String!
@@ -73,21 +88,29 @@ enum Role {
 }
 
 type Route {
-  ascentAt: Date!
+  ascents: [Ascent!]!
   author: User!
 
   """Identifies the date and time when the object was created."""
   createdAt: Date!
   description: String!
-  grade: Grade!
+  discipline: RouteDiscipline!
+  grade: Grade
   id: ID!
   name: String!
-  sessions: Int!
-  tries: Int!
 
   """Identifies the date and time when the object was last updated."""
   updatedAt: Date!
   zone: Zone!
+}
+
+"""Route discipline"""
+enum RouteDiscipline {
+  boulder
+  dws
+  lead
+  other
+  trad
 }
 
 input SignupInput {
@@ -111,6 +134,8 @@ input UpdateUserInput {
 }
 
 type User {
+  ascents: [Ascent!]!
+
   """Identifies the date and time when the object was created."""
   createdAt: Date!
   email: String!
@@ -123,6 +148,10 @@ type User {
   """Identifies the date and time when the object was last updated."""
   updatedAt: Date!
   zones: [Zone!]!
+}
+
+type UserPreferences {
+  preferedDiscipline: RouteDiscipline!
 }
 
 type Zone {

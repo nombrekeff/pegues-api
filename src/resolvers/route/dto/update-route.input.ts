@@ -1,18 +1,20 @@
-import { Optional } from '@nestjs/common';
-import { Grade } from '@prisma/client';
+import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
+import { config } from 'src/configs/config';
+import { Grade } from 'src/models/route.model';
 
 export class UpdateRouteInput {
   @IsNotEmpty()
+  @ApiProperty()
   name: string;
 
+  @ApiProperty()
   description?: string;
-  sessions?: number;
-  tries?: number;
 
+  @ApiProperty()
   zoneId?: string;
 
-  @IsEnum(Grade, { message: 'Invalid grade. See wiki page for info, here: https://github.com/nombrekeff/pegues-api' })
   @IsOptional()
+  @ApiProperty({ enum: Grade, default: Grade.uknown })
   grade?: Grade | null;
 }

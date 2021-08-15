@@ -9,6 +9,7 @@ import {
   NestConfig,
   SwaggerConfig,
 } from './configs/config.interface';
+import { RolesGuard } from './guards/roles.guard';
 const fs = require('fs');
 
 async function bootstrap() {

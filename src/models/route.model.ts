@@ -1,7 +1,9 @@
 import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { User } from './user.model';
-import { BaseModel, ValidBaseSortParams } from './base.model';
+import { BaseModel, baseSortParams, ValidBaseSortParams } from './base.model';
 import { Zone } from './zone.model';
+import { Ascent } from './ascent.model';
+import { ApiProperty } from '@nestjs/swagger';
 
 export enum Grade {
   uknown = '?',
@@ -34,6 +36,19 @@ export enum Grade {
   g9AP = '9A+',
 }
 
+export enum RouteDiscipline {
+  lead,
+  boulder,
+  trad,
+  dws,
+  other,
+}
+
+registerEnumType(RouteDiscipline, {
+  name: 'RouteDiscipline',
+  description: 'Route discipline',
+});
+
 registerEnumType(Grade, {
   name: 'Grade',
   description: 'Route grade',
@@ -44,23 +59,31 @@ export const routeSortParams = <const>[
   'description',
   'zone',
   'grade',
-  'ascentAt',
-  'sessions',
-  'tries',
+  'discipline',
+  ...baseSortParams,
 ];
-type RouteSortParams = typeof routeSortParams[number];
-export type ValidRouteSortParams = RouteSortParams | ValidBaseSortParams;
+export type ValidRouteSortParams = typeof routeSortParams[number];
 
 @ObjectType()
 export class Route extends BaseModel {
+  @ApiProperty()
   name: string;
+
+  @ApiProperty()
   description: string;
 
+  @ApiProperty({ type: () => User })
   author: User;
-  zone: Zone;
-  grade: Grade = Grade.uknown;
 
-  ascentAt: Date;
-  sessions: number;
-  tries: number;
+  @ApiProperty({ type: () => Zone })
+  zone: Zone;
+
+  @ApiProperty({ type: () => Ascent, isArray: true })
+  ascents: Ascent[] = [];
+
+  @ApiProperty({ enum: Grade, default: Grade.uknown })
+  grade?: Grade | null = Grade.uknown;
+
+  @ApiProperty({ enum: RouteDiscipline, default: RouteDiscipline.other })
+  discipline: RouteDiscipline = RouteDiscipline.other;
 }

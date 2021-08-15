@@ -13,45 +13,79 @@ generator dbml {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  email     String   @unique
-  password  String   
-  firstname String?
-  lastname  String?
-  zones     Zone[]
-  routes    Route[]
-  role      Role
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  email       String   @unique
+  password    String   
+  firstname   String?
+  lastname    String?
+  zones       Zone[]   
+  routes      Route[]
+  ascents     Ascent[]
+  roles       Role[]   
+  preferences UserPreferences?
 }
 
 model Zone {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  name      String   @unique
+  name      String   
   author    User?    @relation(fields: [authorId], references: [id])
-  authorId  String?
+  authorId  String   
   routes    Route[]
+  type      String   @default("outdoors")
+
+  @@unique([authorId, id])
 }
 
 model Route {
+  id          String     @id @default(cuid())
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  name        String   
+  description String?   
+  grade       Grade           @default(uknown)
+  discipline  RouteDiscipline @default(other)
+
+
+  author      User?     @relation(fields: [authorId], references: [id])
+  authorId    String?   
+
+  zone        Zone?     @relation(fields: [zoneId], references: [id])
+  zoneId      String?
+
+  ascents     Ascent[]
+  @@unique([authorId, id])
+}
+
+model Ascent {
   id          String    @id @default(cuid())
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  name        String   
-  description String?   
-  grade       Grade     @default(uknown)
+
+  route        Route?   @relation(fields: [routeId], references: [id])
+  routeId      String
+
+  author      User?     @relation(fields: [authorId], references: [id])
+  authorId    String?   
 
   ascentAt    DateTime?
   sessions    Int       @default(0)
   tries       Int       @default(0)
+  @@unique([authorId, id])
+}
 
-  author      User?     @relation(fields: [authorId], references: [id])
-  authorId    String?
+model UserPreferences {
+  id                  String   @id @default(cuid())
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  preferredDiscipline RouteDiscipline @default(lead)
 
-  zone        Zone?     @relation(fields: [zoneId], references: [id])
-  zoneId      String?
+  author    User?     @relation(fields: [authorId], references: [id])
+  authorId  String?   
+  @@unique([authorId, id])
 }
 
 enum Role {
@@ -59,8 +93,16 @@ enum Role {
   USER
 }
 
+ enum RouteDiscipline {
+  lead
+  boulder
+  trad
+  dws
+  other
+}
+
 enum Grade {
-  uknown
+  uknown  
   g3
   g4
   g5
