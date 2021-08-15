@@ -42,6 +42,11 @@ export class RoutesService {
                   zoneId: params.zoneId,
                 }
               : {}),
+            ...(params.grade
+              ? {
+                  grade: params.grade,
+                }
+              : {}),
           },
           OR: [
             searchByQuery('name', params.search),

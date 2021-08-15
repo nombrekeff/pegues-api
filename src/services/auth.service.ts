@@ -9,10 +9,11 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { PasswordService } from './password.service';
 import { SignupInput } from '../resolvers/auth/dto/signup.input';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, RouteDiscipline, User } from '@prisma/client';
 import { Token } from '../models/token.model';
 import { ConfigService } from '@nestjs/config';
 import { SecurityConfig } from 'src/configs/config.interface';
+import { UserPreferences } from 'src/models/user-preferences.model';
 
 @Injectable()
 export class AuthService {
@@ -32,6 +33,11 @@ export class AuthService {
       const user = await this.prisma.user.create({
         data: {
           ...payload,
+          preferences: {
+            create: {
+              ...UserPreferences.defaultPrefereneces
+            },
+          },
           password: hashedPassword,
           roles: ['USER'],
         },
@@ -85,7 +91,7 @@ export class AuthService {
   generateTokens(payload: { userId: string }): Token {
     return {
       accessToken: this.generateAccessToken(payload),
-      refreshToken: this.generateRefreshToken(payload)
+      refreshToken: this.generateRefreshToken(payload),
     };
   }
 
@@ -95,13 +101,10 @@ export class AuthService {
 
   private generateRefreshToken(payload: { userId: string }): string {
     const securityConfig = this.configService.get<SecurityConfig>('security');
-    return this.jwtService.sign(
-      payload,
-      {
-        secret: this.configService.get('JWT_REFRESH_SECRET'),
+    return this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_REFRESH_SECRET'),
       expiresIn: securityConfig.refreshIn,
-      },
-    );
+    });
   }
 
   refreshToken(token: string) {

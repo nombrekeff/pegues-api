@@ -1,5 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, RouteDiscipline } from '@prisma/client';
 import * as dotenv from 'dotenv';
+import { UserPreferences } from 'src/models/user-preferences.model';
 
 const prisma = new PrismaClient();
 
@@ -14,6 +15,11 @@ async function main() {
       lastname: 'Edge',
       password: '$2b$10$EpRnTzVlqHNP0.fUbXUwSOyuiXe/QLSUG6xNekdHgTGmrpHEfIoxm', // secret42
       roles: ['USER'],
+      preferences: {
+        create: {
+          ...UserPreferences.defaultPrefereneces,
+        },
+      },
     },
   });
   const user2 = await prisma.user.create({
@@ -23,7 +29,46 @@ async function main() {
       lastname: 'admin',
       roles: ['ADMIN'],
       password: '$2b$10$EpRnTzVlqHNP0.fUbXUwSOyuiXe/QLSUG6xNekdHgTGmrpHEfIoxm', // secret42
+      preferences: {
+        create: {
+          ...UserPreferences.defaultPrefereneces,
+        },
+      },
     },
+  });
+
+  const zone1 = await prisma.zone.create({
+    data: {
+      name: 'Zone 1',
+      authorId: user1.id,
+    },
+  });
+
+  const zone2 = await prisma.zone.create({
+    data: {
+      name: 'Zone 2',
+      authorId: user2.id,
+    },
+  });
+
+  const route1 = await prisma.route.createMany({
+    data: [
+      {
+        name: 'Route 1',
+        zoneId: zone1.id,
+        authorId: user1.id,
+      },
+    ],
+  });
+
+  const route2 = await prisma.route.createMany({
+    data: [
+      {
+        name: 'Route 2',
+        zoneId: zone2.id,
+        authorId: user2.id,
+      },
+    ],
   });
 
   console.log({ user1, user2 });
