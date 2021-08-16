@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -10,24 +11,25 @@ import {
 } from '@nestjs/common';
 import { ArgsType } from '@nestjs/graphql';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { AscentQueryArgs } from 'src/models/args/ascent-query.args';
 import { QueryAllArgs } from 'src/models/args/query-all.args';
 import { SortArgs } from 'src/models/args/sort.args';
-import { ValidAscentSortParams } from 'src/models/ascent.model';
+import { Ascent, ValidAscentSortParams } from 'src/models/ascent.model';
 import { CreateAscentInput } from 'src/models/dto/create_ascent.dto';
 import { UpdateAscentInput } from 'src/models/dto/update_ascent.dto';
 import { AscentService } from 'src/services/ascent.service';
 
-@Controller()
+@Controller('ascents')
 @ApiTags('ascents')
 @UseGuards(AuthGuard('jwt'))
 export class AscentController {
   constructor(private readonly service: AscentService) {}
 
-  @Get('ascents')
+  @Get('')
+  @ApiResponse({ type: () => Ascent, isArray: true, status: 200 })
   async getAscents(
     @CurrentUser() user: User,
     @Query() query: QueryAllArgs<ValidAscentSortParams>
@@ -35,13 +37,20 @@ export class AscentController {
     return this.service.getAllForUser(user.id, query);
   }
 
-  @Post('ascents')
+  @Post('')
+  @ApiResponse({ type: () => Ascent, status: 200 })
   async add(@CurrentUser() user: User, @Body() data: CreateAscentInput) {
     return this.service.create(user.id, data);
   }
 
-  @Put('ascents/:id')
+  @Put(':id')
+  @ApiResponse({ type: () => Ascent, status: 200 })
   async edit(@Param('id') id: string, @Body() data: UpdateAscentInput) {
     return this.service.update(id, data);
+  }
+
+  @Delete(':id')
+  async deleteZone(@CurrentUser() user: User, @Param('id') id: string) {
+    return this.service.remove(user.id, id);
   }
 }

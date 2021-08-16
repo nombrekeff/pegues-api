@@ -1,21 +1,21 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
   Put,
   Query,
-  SetMetadata,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
-import { IsRole, Roles } from 'src/decorators/roles-decorator';
+import { IsRole } from 'src/decorators/roles-decorator';
 import { JwtAuthGuard } from 'src/guards/jwt.guard';
 import { RouteQueryArgs } from 'src/models/args/route-query.args';
 import { ZoneQueryArgs } from 'src/models/args/zone-query.args';
+import { Route } from 'src/models/route.model';
 import { Role, User } from 'src/models/user.model';
 import { Zone } from 'src/models/zone.model';
 import { CreateZoneInput } from 'src/resolvers/zone/dto/create-zone.input';
@@ -46,6 +46,7 @@ export class ZonesController {
   }
 
   @Get('zones/:id/routes')
+  @ApiResponse({ type: () => Route, isArray: true, status: 200 })
   async getZoneRoutes(
     @CurrentUser() user: User,
     @Param('id') zoneId: string,
@@ -55,16 +56,23 @@ export class ZonesController {
   }
 
   @Post('zones')
+  @ApiResponse({ type: () => Zone, status: 200 })
   async addZone(@CurrentUser() user: User, @Body() data: CreateZoneInput) {
-    return await this.zoneService.createZone(user.id, data);
+    return await this.zoneService.create(user.id, data);
   }
 
   @Put('zones/:id')
+  @ApiResponse({ type: () => Zone, status: 200 })
   async editZone(
     @CurrentUser() user: User,
     @Param('id') id: string,
     @Body() data: CreateZoneInput
   ) {
-    return await this.zoneService.updateZone(user.id, id, data);
+    return await this.zoneService.update(user.id, id, data);
+  }
+
+  @Delete(':id')
+  async deleteZone(@CurrentUser() user: User, @Param('id') id: string) {
+    return this.zoneService.remove(user.id, id);
   }
 }

@@ -2,7 +2,7 @@ import { ObjectType } from '@nestjs/graphql';
 import { BaseModel, baseSortParams, ValidBaseSortParams } from './base.model';
 import { User } from './user.model';
 import { Route } from './route.model';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { IsIn, IsString } from 'class-validator';
 
 export const zoneSortParams = <const>['name', ...baseSortParams];
@@ -15,7 +15,7 @@ export class Zone extends BaseModel {
   @ApiProperty()
   name: string;
 
-  @ApiProperty({ type: () => User })
+  @ApiHideProperty()
   author: User;
 
   @ApiProperty({ type: () => Route, isArray: true })

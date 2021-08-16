@@ -1,6 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { searchByQuery } from 'src/common/common_queries';
+import { ErrorCodes } from 'src/common/error_codes';
 import { SortHelper } from 'src/common/sort_helper';
 import { ZoneQueryArgs } from 'src/models/args/zone-query.args';
 import { zoneSortParams } from 'src/models/zone.model';
@@ -93,7 +95,7 @@ export class ZonesService {
       });
   }
 
-  async createZone(userId: string, zoneData: CreateZoneInput) {
+  async create(userId: string, zoneData: CreateZoneInput) {
     try {
       const zone = await this.prisma.zone.create({
         data: {
@@ -114,7 +116,7 @@ export class ZonesService {
     }
   }
 
-  async updateZone(userId: string, zoneId: string, zoneData: EditZoneInput) {
+  async update(userId: string, zoneId: string, zoneData: EditZoneInput) {
     try {
       const zone = await this.prisma.zone.update({
         where: {
@@ -140,6 +142,30 @@ export class ZonesService {
       } else {
         throw new Error(e);
       }
+    }
+  }
+
+  async remove(userId: string, id: string) {
+    try {
+      const zone = await this.prisma.zone.delete({
+        where: {
+          authorId_id: { id: id, authorId: userId },
+        },
+      });
+      return {
+        message: 'Deleted zone: ' + zone.id,
+      };
+    } catch (e) {
+      if (
+        e instanceof PrismaClientKnownRequestError &&
+        e.code == ErrorCodes.targetNotFound
+      ) {
+        throw new HttpException(
+          `Zone "${id}" not found`,
+          HttpStatus.NOT_FOUND
+        );
+      }
+      throw new Error(e);
     }
   }
 }

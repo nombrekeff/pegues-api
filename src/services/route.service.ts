@@ -1,24 +1,17 @@
-import { Grade } from './../models/route.model';
-import { BadRequestException, HttpStatus } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { Injectable, Logger } from '@nestjs/common';
-import { ConflictException, HttpException } from '@nestjs/common/exceptions';
+import { HttpException } from '@nestjs/common/exceptions';
 import { Prisma } from '@prisma/client';
 import { ErrorCodes } from 'src/common/error_codes';
 import { SortHelper } from 'src/common/sort_helper';
-import { QueryAllArgs } from 'src/models/args/query-all.args';
-import { SortArgs } from 'src/models/args/sort.args';
-import {
-  Route,
-  routeSortParams,
-  ValidRouteSortParams,
-} from 'src/models/route.model';
+import { routeSortParams } from 'src/models/route.model';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateRouteInput } from 'src/resolvers/route/dto/create-route.input';
 import { UpdateRouteInput } from 'src/resolvers/route/dto/update-route.input';
 import { searchByQuery } from 'src/common/common_queries';
 import { RouteQueryArgs } from 'src/models/args/route-query.args';
-import { NotFoundException } from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import { HttpResponse } from 'src/common/response';
 
 @Injectable()
 export class RoutesService {
@@ -85,6 +78,46 @@ export class RoutesService {
       });
 
     return routes;
+  }
+
+  async getRandomRoute(userId: string, params: RouteQueryArgs = {}) {
+    const routes = await this.prisma.route.findMany({
+      where: {
+        AND: {
+          authorId: userId,
+          ...(params.zoneId
+            ? {
+                zoneId: params.zoneId,
+              }
+            : {}),
+          ...(params.grade
+            ? {
+                grade: params.grade,
+              }
+            : {}),
+        },
+        OR: [
+          searchByQuery('name', params.search),
+          {
+            zone: {
+              ...searchByQuery('name', params.search),
+            },
+          },
+        ],
+      },
+      include: {
+        zone: true,
+        ascents: true,
+      },
+    });
+
+    if (routes.length > 0) {
+      const randIndex = Math.floor(Math.random() * routes.length);
+
+      return HttpResponse.ok(routes[randIndex]);
+    }
+
+    return HttpResponse.ok(null, 'No route found');
   }
 
   async getAll(params: RouteQueryArgs = {}) {
@@ -200,14 +233,16 @@ export class RoutesService {
     }
   }
 
-  async removeRoute(userId: string, id: string) {
+  async remove(userId: string, id: string) {
     try {
       const route = await this.prisma.route.delete({
         where: {
           authorId_id: { id: id, authorId: userId },
         },
       });
-      return route;
+      return {
+        message: 'Deleted route: ' + route.id,
+      };
     } catch (e) {
       if (
         e instanceof PrismaClientKnownRequestError &&

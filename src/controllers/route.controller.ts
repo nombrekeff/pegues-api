@@ -7,15 +7,17 @@ import {
   Post,
   Put,
   Query,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
+import { HttpResponse } from 'src/common/response';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { AscentQueryArgs } from 'src/models/args/ascent-query.args';
 import { RouteQueryArgs } from 'src/models/args/route-query.args';
+import { Ascent } from 'src/models/ascent.model';
+import { Route } from 'src/models/route.model';
 import { CreateRouteInput } from 'src/resolvers/route/dto/create-route.input';
 import { UpdateRouteInput } from 'src/resolvers/route/dto/update-route.input';
 import { AscentService } from 'src/services/ascent.service';
@@ -31,11 +33,19 @@ export class RoutesController {
   ) {}
 
   @Get('')
+  @ApiResponse({ status: 200, type: Route, isArray: true })
   async getMyRoutes(@CurrentUser() user: User, @Query() query: RouteQueryArgs) {
     return this.routeService.getAllForUser(user.id, query);
   }
 
+  @Get('random')
+  @ApiResponse({ status: 200, type: HttpResponse })
+  async getRandom(@CurrentUser() user: User, @Query() query: RouteQueryArgs) {
+    return this.routeService.getRandomRoute(user.id, query);
+  }
+
   @Get(':id/ascents')
+  @ApiResponse({ status: 200, type: Ascent, isArray: true })
   async getAscentsForRoute(
     @CurrentUser() user: User,
     @Param('id') routeId: string,
@@ -45,11 +55,13 @@ export class RoutesController {
   }
 
   @Post('')
+  @ApiResponse({ status: 200, type: Route })
   async addRoute(@CurrentUser() user: User, @Body() data: CreateRouteInput) {
     return this.routeService.createRoute(user.id, data);
   }
 
   @Put(':id')
+  @ApiResponse({ status: 200, type: Route })
   async editRoute(
     @CurrentUser() user: User,
     @Param('id') id: string,
@@ -60,6 +72,6 @@ export class RoutesController {
 
   @Delete(':id')
   async deleteRoute(@CurrentUser() user: User, @Param('id') id: string) {
-    return this.routeService.removeRoute(user.id, id);
+    return this.routeService.remove(user.id, id);
   }
 }
