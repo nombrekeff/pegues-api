@@ -22,6 +22,7 @@ async function main() {
       },
     },
   });
+  
   const user2 = await prisma.user.create({
     data: {
       email: 'admin@edge.com',

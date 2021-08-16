@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -55,5 +56,10 @@ export class RoutesController {
     @Body() data: UpdateRouteInput
   ) {
     return this.routeService.updateRoute(user.id, id, data);
+  }
+
+  @Delete(':id')
+  async deleteRoute(@CurrentUser() user: User, @Param('id') id: string) {
+    return this.routeService.removeRoute(user.id, id);
   }
 }

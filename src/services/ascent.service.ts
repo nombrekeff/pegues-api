@@ -46,13 +46,26 @@ export class AscentService {
 
     const ascents = await this.prisma.ascent.findMany({
       where: {
-        ...where,
-        route: {
-          ...searchByQuery('name', params.search),
-        },
+        OR: [
+          {
+            ...where,
+            route: {
+              ...searchByQuery('name', params.search),
+            },
+          },
+          {
+            route: {
+              zone: {
+                ...searchByQuery('name', params.search),
+              },
+            },
+          },
+        ],
       },
       include: {
-        route: true,
+        route: {
+          include: { zone: true },
+        },
       },
       orderBy: {
         [sortBy]: sortDir,

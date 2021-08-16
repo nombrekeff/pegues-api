@@ -152,6 +152,7 @@ export class RoutesService {
           name: routeData.name,
           grade: routeData.grade,
           description: routeData.description,
+          discipline: routeData.discipline,
           // TODO: create ascent if passed in
         },
       });
@@ -182,6 +183,28 @@ export class RoutesService {
           grade: routeData.grade as any,
           description: routeData.description,
           zoneId: routeData.zoneId,
+        },
+      });
+      return route;
+    } catch (e) {
+      if (
+        e instanceof PrismaClientKnownRequestError &&
+        e.code == ErrorCodes.targetNotFound
+      ) {
+        throw new HttpException(
+          `Route "${id}" not found`,
+          HttpStatus.NOT_FOUND
+        );
+      }
+      throw new Error(e);
+    }
+  }
+
+  async removeRoute(userId: string, id: string) {
+    try {
+      const route = await this.prisma.route.delete({
+        where: {
+          authorId_id: { id: id, authorId: userId },
         },
       });
       return route;

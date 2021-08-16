@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
 import { config } from 'src/configs/config';
-import { Grade } from 'src/models/route.model';
+import { Grade, RouteDiscipline } from 'src/models/route.model';
 
 export class UpdateRouteInput {
   @IsNotEmpty()
@@ -17,4 +17,8 @@ export class UpdateRouteInput {
   @IsOptional()
   @ApiProperty({ enum: Grade, default: Grade.uknown })
   grade?: Grade | null;
+
+  @IsOptional()
+  @ApiProperty({ enum: RouteDiscipline, default: RouteDiscipline.other })
+  discipline?: RouteDiscipline | null;
 }
