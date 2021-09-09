@@ -1,30 +1,26 @@
-import { Grade } from './../models/route.model';
-import { BadRequestException, HttpStatus } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { Injectable, Logger } from '@nestjs/common';
-import { ConflictException, HttpException } from '@nestjs/common/exceptions';
-import { Prisma } from '@prisma/client';
+import { HttpException } from '@nestjs/common/exceptions';
+import { Prisma, Route } from '@prisma/client';
 import { ErrorCodes } from 'src/common/error_codes';
 import { SortHelper } from 'src/common/sort_helper';
-import { QueryAllArgs } from 'src/models/args/query-all.args';
-import { SortArgs } from 'src/models/args/sort.args';
-import {
-  Route,
-  routeSortParams,
-  ValidRouteSortParams,
-} from 'src/models/route.model';
+import { routeSortParams } from 'src/models/route.model';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateRouteInput } from 'src/resolvers/route/dto/create-route.input';
 import { UpdateRouteInput } from 'src/resolvers/route/dto/update-route.input';
 import { searchByQuery } from 'src/common/common_queries';
 import { RouteQueryArgs } from 'src/models/args/route-query.args';
-import { NotFoundException } from '@nestjs/common';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import { HttpResponse } from 'src/common/responses/http_response';
+import { AscentQueryArgs } from 'src/models/args/ascent-query.args';
+import { ConfigService } from '@nestjs/config';
+import { DefaultsConfig } from 'src/configs/config.interface';
 
 @Injectable()
-export class RoutesService {
+export class RouteService {
   private readonly logger = new Logger('routes');
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, public config: ConfigService) {}
 
   async getAllForUser(userId: string, params: RouteQueryArgs = {}) {
     const { sortBy, sortDir } = SortHelper.safeSortParams(
@@ -32,7 +28,7 @@ export class RoutesService {
       routeSortParams
     );
 
-    const routes = await this.prisma.route
+    return await this.prisma.route
       .findMany({
         where: {
           AND: {
@@ -64,27 +60,91 @@ export class RoutesService {
         orderBy: {
           [sortBy]: sortDir,
         },
+        skip: Number(params.skip ?? 0),
+        take:
+          Number(params.take) ||
+          this.config.get<DefaultsConfig>('defaults').defaultPaginationTake,
       })
-      .then(async (routes) => {
-        const withCount = [];
+      .then(this.computeVirtualProperties.bind(this));
+  }
 
-        for (const route of routes) {
-          const count = await this.prisma.ascent.count({
-            where: {
-              routeId: route.id,
+  async getMinMaxGradeForUser(authorId: string) {
+    return await this.prisma.route
+      .aggregate({
+        where: {
+          authorId,
+        },
+        _max: {
+          grade: true,
+        },
+        _min: {
+          grade: true,
+        },
+      })
+      .then((result) => ({
+        max: result._max,
+        min: result._min,
+      }));
+  }
+
+  async getMinMaxGradeForZone(authorId: string, zoneId: string) {
+    return await this.prisma.route
+      .aggregate({
+        where: {
+          zoneId,
+          authorId,
+        },
+        _max: {
+          grade: true,
+        },
+        _min: {
+          grade: true,
+        },
+      })
+      .then((result) => ({
+        max: result._max,
+        min: result._min,
+      }));
+  }
+
+  async getRandomRoute(userId: string, params: RouteQueryArgs = {}) {
+    const routes = await this.prisma.route.findMany({
+      where: {
+        AND: {
+          authorId: userId,
+          ...(params.zoneId
+            ? {
+                zoneId: params.zoneId,
+              }
+            : {}),
+          ...(params.grade
+            ? {
+                grade: params.grade,
+              }
+            : {}),
+        },
+        OR: [
+          searchByQuery('name', params.search),
+          {
+            zone: {
+              ...searchByQuery('name', params.search),
             },
-          });
+          },
+        ],
+      },
+      include: {
+        zone: true,
+        ascents: true,
+      },
+    });
 
-          withCount.push({
-            ...route,
-            ascentCount: count,
-          });
-        }
+    if (routes.length > 0) {
+      const randIndex = Math.floor(Math.random() * routes.length);
 
-        return withCount;
-      });
+      return HttpResponse.ok(routes[randIndex]);
+    }
 
-    return routes;
+    return HttpResponse.ok(null, 'No route found');
   }
 
   async getAll(params: RouteQueryArgs = {}) {
@@ -93,7 +153,7 @@ export class RoutesService {
       routeSortParams
     );
 
-    const routes = await this.prisma.route
+    return await this.prisma.route
       .findMany({
         where: {
           AND: {
@@ -119,27 +179,27 @@ export class RoutesService {
         orderBy: {
           [sortBy]: sortDir,
         },
+        skip: Number(params.skip ?? 0),
+        take:
+          Number(params.take) ||
+          this.config.get<DefaultsConfig>('defaults').defaultPaginationTake,
       })
-      .then(async (routes) => {
-        const withCount = [];
+      .then(this.computeVirtualProperties.bind(this));
+  }
 
-        for (const route of routes) {
-          const count = await this.prisma.ascent.count({
-            where: {
-              routeId: route.id,
-            },
-          });
-
-          withCount.push({
-            ...route,
-            ascentCount: count,
-          });
-        }
-
-        return withCount;
-      });
-
-    return routes;
+  async getOne(authorId: string, routeId: string): Promise<Route> {
+    return await this.prisma.route
+      .findFirst({
+        where: {
+          authorId,
+          id: routeId,
+        },
+        include: {
+          zone: true,
+          ascents: true,
+        },
+      })
+      .then(this.computeVirtualForRoute.bind(this));
   }
 
   async createRoute(userId: string, routeData: CreateRouteInput) {
@@ -152,6 +212,7 @@ export class RoutesService {
           name: routeData.name,
           grade: routeData.grade,
           description: routeData.description,
+          discipline: routeData.discipline,
           // TODO: create ascent if passed in
         },
       });
@@ -197,5 +258,52 @@ export class RoutesService {
       }
       throw new Error(e);
     }
+  }
+
+  async remove(userId: string, id: string) {
+    try {
+      const route = await this.prisma.route.delete({
+        where: {
+          authorId_id: { id: id, authorId: userId },
+        },
+      });
+      return {
+        message: 'Deleted route: ' + route.id,
+      };
+    } catch (e) {
+      if (
+        e instanceof PrismaClientKnownRequestError &&
+        e.code == ErrorCodes.targetNotFound
+      ) {
+        throw new HttpException(
+          `Route "${id}" not found`,
+          HttpStatus.NOT_FOUND
+        );
+      }
+      throw new Error(e);
+    }
+  }
+
+  private async computeVirtualProperties(routes: Route[]) {
+    const withCount = [];
+
+    for (const route of routes) {
+      withCount.push(await this.computeVirtualForRoute(route));
+    }
+
+    return withCount;
+  }
+
+  private async computeVirtualForRoute(route: Route) {
+    const totalAscents = await this.prisma.ascent.count({
+      where: {
+        routeId: route.id,
+      },
+    });
+
+    return {
+      ...route,
+      totalAscents,
+    };
   }
 }

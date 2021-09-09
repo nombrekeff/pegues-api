@@ -1,9 +1,8 @@
-import { Field, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { User } from './user.model';
 import { BaseModel, baseSortParams, ValidBaseSortParams } from './base.model';
 import { Zone } from './zone.model';
 import { Ascent } from './ascent.model';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 
 export enum Grade {
   uknown = '?',
@@ -37,22 +36,12 @@ export enum Grade {
 }
 
 export enum RouteDiscipline {
-  lead,
-  boulder,
-  trad,
-  dws,
-  other,
+  lead = 'lead',
+  boulder = 'boulder',
+  trad = 'trad',
+  dws = 'dws',
+  other = 'other',
 }
-
-registerEnumType(RouteDiscipline, {
-  name: 'RouteDiscipline',
-  description: 'Route discipline',
-});
-
-registerEnumType(Grade, {
-  name: 'Grade',
-  description: 'Route grade',
-});
 
 export const routeSortParams = <const>[
   'name',
@@ -64,7 +53,6 @@ export const routeSortParams = <const>[
 ];
 export type ValidRouteSortParams = typeof routeSortParams[number];
 
-@ObjectType()
 export class Route extends BaseModel {
   @ApiProperty()
   name: string;
@@ -72,7 +60,7 @@ export class Route extends BaseModel {
   @ApiProperty()
   description: string;
 
-  @ApiProperty({ type: () => User })
+  @ApiHideProperty()
   author: User;
 
   @ApiProperty({ type: () => Zone })

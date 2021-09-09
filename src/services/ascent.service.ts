@@ -1,17 +1,15 @@
 import { HttpStatus } from '@nestjs/common';
 import { Injectable, Logger } from '@nestjs/common';
 import { HttpException } from '@nestjs/common/exceptions';
-import { Prisma } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
+import { Ascent, Prisma } from '@prisma/client';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { searchByQuery } from 'src/common/common_queries';
 import { ErrorCodes } from 'src/common/error_codes';
 import { SortHelper } from 'src/common/sort_helper';
+import { DefaultsConfig } from 'src/configs/config.interface';
 import { AscentQueryArgs } from 'src/models/args/ascent-query.args';
-import { QueryAllArgs } from 'src/models/args/query-all.args';
-import { SortArgs } from 'src/models/args/sort.args';
-import {
-  ascentSortParams,
-  ValidAscentSortParams,
-} from 'src/models/ascent.model';
+import { ascentSortParams } from 'src/models/ascent.model';
 import { CreateAscentInput } from 'src/models/dto/create_ascent.dto';
 import { UpdateAscentInput } from 'src/models/dto/update_ascent.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -20,7 +18,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class AscentService {
   private readonly logger = new Logger('ascent');
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private config: ConfigService) {}
 
   async getAllForUser(authorId: string, params: AscentQueryArgs = {}) {
     return this._getAllWhere({ authorId }, params);
@@ -32,6 +30,18 @@ export class AscentService {
     params: AscentQueryArgs = {}
   ) {
     return this._getAllWhere({ routeId, authorId }, params);
+  }
+
+  async getOne(authorId: string, ascentId: string): Promise<Ascent> {
+    return await this.prisma.ascent.findFirst({
+      where: {
+        authorId,
+        id: ascentId,
+      },
+      include: {
+        route: true,
+      },
+    });
   }
 
   async getAllForZone(zoneId: string, params: AscentQueryArgs = {}) {
@@ -46,17 +56,46 @@ export class AscentService {
 
     const ascents = await this.prisma.ascent.findMany({
       where: {
-        ...where,
-        route: {
-          ...searchByQuery('name', params.search),
+        AND: {
+          ...(params.routeId
+            ? {
+                routeId: params.routeId,
+              }
+            : {}),
+          ...(params.zoneId
+            ? {
+                route: { zoneId: params.routeId },
+              }
+            : {}),
         },
+        OR: [
+          {
+            ...where,
+            route: {
+              ...searchByQuery('name', params.search),
+            },
+          },
+          {
+            route: {
+              zone: {
+                ...searchByQuery('name', params.search),
+              },
+            },
+          },
+        ],
       },
       include: {
-        route: true,
+        route: {
+          include: { zone: true },
+        },
       },
       orderBy: {
         [sortBy]: sortDir,
       },
+      skip: Number(params.skip ?? 0),
+      take:
+        Number(params.take) ||
+        this.config.get<DefaultsConfig>('defaults').defaultPaginationTake,
     });
 
     return ascents;
@@ -104,6 +143,30 @@ export class AscentService {
       });
       return route;
     } catch (e) {
+      throw new Error(e);
+    }
+  }
+
+  async remove(userId: string, id: string) {
+    try {
+      const ascent = await this.prisma.ascent.delete({
+        where: {
+          authorId_id: { id: id, authorId: userId },
+        },
+      });
+      return {
+        message: 'Deleted ascent: ' + ascent.id,
+      };
+    } catch (e) {
+      if (
+        e instanceof PrismaClientKnownRequestError &&
+        e.code == ErrorCodes.targetNotFound
+      ) {
+        throw new HttpException(
+          `Ascent "${id}" not found`,
+          HttpStatus.NOT_FOUND
+        );
+      }
       throw new Error(e);
     }
   }
