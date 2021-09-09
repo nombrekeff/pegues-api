@@ -1,14 +1,13 @@
-import { ArgsType } from '@nestjs/graphql';
+
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNumber, IsOptional, IsString } from 'class-validator';
-import { PaginationArgs } from 'src/common/pagination/pagination.args';
+import { IsOptional, IsString } from 'class-validator';
 import { SortOrder } from 'src/types';
 import { SearchArgs } from './search.args';
 import { SortArgs } from './sort.args';
 
-@ArgsType()
+
 export class QueryAllArgs<T>
-  implements SearchArgs, SortArgs<T>, PaginationArgs
+  implements SearchArgs, SortArgs<T>
 {
   @ApiProperty()
   @IsString()

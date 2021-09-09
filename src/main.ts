@@ -9,7 +9,6 @@ import {
   NestConfig,
   SwaggerConfig,
 } from './configs/config.interface';
-import { RolesGuard } from './guards/roles.guard';
 const fs = require('fs');
 
 async function bootstrap() {
@@ -50,7 +49,10 @@ async function bootstrap() {
       .build();
     const document = SwaggerModule.createDocument(app, options);
 
-    SwaggerModule.setup(swaggerConfig.path || 'api', app, document);
+    SwaggerModule.setup(swaggerConfig.path || 'api', app, document, {
+      customSiteTitle: 'Pegues API',
+      customCssUrl: `/theme-material.css`,
+    });
   }
 
   // Cors

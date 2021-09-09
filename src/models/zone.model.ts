@@ -1,5 +1,4 @@
-import { ObjectType } from '@nestjs/graphql';
-import { BaseModel, baseSortParams, ValidBaseSortParams } from './base.model';
+import { BaseModel, baseSortParams,  } from './base.model';
 import { User } from './user.model';
 import { Route } from './route.model';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
@@ -10,7 +9,6 @@ export type ValidZoneSortParams = typeof zoneSortParams[number];
 
 export type ZoneType = 'indoors' | 'outdoors';
 
-@ObjectType()
 export class Zone extends BaseModel {
   @ApiProperty()
   name: string;

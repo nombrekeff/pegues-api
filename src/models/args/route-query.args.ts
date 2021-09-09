@@ -1,4 +1,4 @@
-import { ArgsType } from '@nestjs/graphql';
+
 import { ApiProperty } from '@nestjs/swagger';
 import { Grade } from '@prisma/client';
 import { IsOptional, IsString, IsEnum, IsBoolean } from 'class-validator';
@@ -6,7 +6,7 @@ import { config } from 'src/configs/config';
 import { ValidRouteSortParams } from '../route.model';
 import { QueryAllArgs } from './query-all.args';
 
-@ArgsType()
+
 export class RouteQueryArgs extends QueryAllArgs<ValidRouteSortParams> {
   @IsString()
   @IsOptional()

@@ -2,8 +2,6 @@ import { AscentModule } from './resolvers/ascent/ascent.module';
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AuthModule } from './resolvers/auth/auth.module';
 import { UserModule } from './resolvers/user/user.module';
-import { AppResolver } from './resolvers/app.resolver';
-import { DateScalar } from './common/scalars/date.scalar';
 import { ConfigModule } from '@nestjs/config';
 import { AuthController } from './controllers/auth.controller';
 import { UserController } from './controllers/user.controller';
@@ -18,6 +16,7 @@ import { UserPreferencesModule } from './resolvers/user-preferences/user-prefere
 import { UserPreferencesController } from './controllers/user-preferences.controller';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './guards/roles.guard';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -38,8 +37,6 @@ import { RolesGuard } from './guards/roles.guard';
     UserPreferencesController,
   ],
   providers: [
-    AppResolver,
-    DateScalar,
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
