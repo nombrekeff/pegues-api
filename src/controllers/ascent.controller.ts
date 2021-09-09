@@ -29,11 +29,12 @@ export class AscentController {
   constructor(private readonly service: AscentService) {}
 
   @Get('')
-  @ApiResponse({ type: () => Ascent, isArray: true, status: 200 })
-  async getAscents(
-    @CurrentUser() user: User,
-    @Query() query: QueryAllArgs<ValidAscentSortParams>
-  ) {
+  @ApiResponse({
+    type: () => Ascent,
+    isArray: true,
+    status: 200,
+  })
+  async getAscents(@CurrentUser() user: User, @Query() query: AscentQueryArgs) {
     return this.service.getAllForUser(user.id, query);
   }
 

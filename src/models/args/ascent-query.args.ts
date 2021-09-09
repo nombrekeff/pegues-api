@@ -10,4 +10,9 @@ export class AscentQueryArgs extends QueryAllArgs<ValidAscentSortParams> {
   @ApiProperty()
   @IsOptional()
   routeId?: string;
+
+  @IsString()
+  @ApiProperty()
+  @IsOptional()
+  zoneId?: string;
 }

@@ -42,6 +42,18 @@ export class AscentService {
 
     const ascents = await this.prisma.ascent.findMany({
       where: {
+        AND: {
+          ...(params.routeId
+            ? {
+                routeId: params.routeId,
+              }
+            : {}),
+          ...(params.zoneId
+            ? {
+                route: { zoneId: params.routeId },
+              }
+            : {}),
+        },
         OR: [
           {
             ...where,
