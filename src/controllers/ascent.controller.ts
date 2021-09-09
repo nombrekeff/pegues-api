@@ -7,17 +7,14 @@ import {
   Post,
   Put,
   Query,
-  UseGuards,
+  UseGuards
 } from '@nestjs/common';
-import { ArgsType } from '@nestjs/graphql';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { AscentQueryArgs } from 'src/models/args/ascent-query.args';
-import { QueryAllArgs } from 'src/models/args/query-all.args';
-import { SortArgs } from 'src/models/args/sort.args';
-import { Ascent, ValidAscentSortParams } from 'src/models/ascent.model';
+import { Ascent } from 'src/models/ascent.model';
 import { CreateAscentInput } from 'src/models/dto/create_ascent.dto';
 import { UpdateAscentInput } from 'src/models/dto/update_ascent.dto';
 import { AscentService } from 'src/services/ascent.service';

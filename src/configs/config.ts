@@ -3,6 +3,9 @@ import { Config } from './config.interface';
 export const config: Config = {
   env: 'pre',
   docsUrl: 'https://mis-pegues.com/api',
+  defaults: {
+    defaultPaginationTake: 15,
+  },
   nest: {
     port: 3000,
   },

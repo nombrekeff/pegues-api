@@ -1,11 +1,16 @@
 export interface Config {
   env: 'pre' | 'prod';
+  defaults: DefaultsConfig;
   nest: NestConfig;
   cors: CorsConfig;
   swagger: SwaggerConfig;
   graphql: GraphqlConfig;
   security: SecurityConfig;
   docsUrl: string;
+}
+
+export interface DefaultsConfig {
+  defaultPaginationTake: number;
 }
 
 export interface NestConfig {

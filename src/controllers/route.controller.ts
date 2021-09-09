@@ -21,14 +21,14 @@ import { Route } from 'src/models/route.model';
 import { CreateRouteInput } from 'src/resolvers/route/dto/create-route.input';
 import { UpdateRouteInput } from 'src/resolvers/route/dto/update-route.input';
 import { AscentService } from 'src/services/ascent.service';
-import { RoutesService } from 'src/services/route.service';
+import { RouteService } from 'src/services/route.service';
 
 @Controller('routes')
 @ApiTags('routes')
 @UseGuards(AuthGuard('jwt'))
 export class RoutesController {
   constructor(
-    private readonly routeService: RoutesService,
+    private readonly routeService: RouteService,
     private readonly ascentService: AscentService
   ) {}
 

@@ -1,7 +1,7 @@
 import { ArgsType } from '@nestjs/graphql';
 import { ApiProperty } from '@nestjs/swagger';
 import { Grade } from '@prisma/client';
-import { IsOptional, IsString, IsEnum } from 'class-validator';
+import { IsOptional, IsString, IsEnum, IsBoolean } from 'class-validator';
 import { config } from 'src/configs/config';
 import { ValidRouteSortParams } from '../route.model';
 import { QueryAllArgs } from './query-all.args';
@@ -12,6 +12,11 @@ export class RouteQueryArgs extends QueryAllArgs<ValidRouteSortParams> {
   @IsOptional()
   @ApiProperty()
   zoneId?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  @ApiProperty()
+  hasAscents?: boolean;
 
   @IsEnum(Grade, {
     message: (args) => {

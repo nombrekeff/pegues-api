@@ -12,12 +12,15 @@ import { searchByQuery } from 'src/common/common_queries';
 import { RouteQueryArgs } from 'src/models/args/route-query.args';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { HttpResponse } from 'src/common/responses/http_response';
+import { AscentQueryArgs } from 'src/models/args/ascent-query.args';
+import { ConfigService } from '@nestjs/config';
+import { DefaultsConfig } from 'src/configs/config.interface';
 
 @Injectable()
-export class RoutesService {
+export class RouteService {
   private readonly logger = new Logger('routes');
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, public config: ConfigService) {}
 
   async getAllForUser(userId: string, params: RouteQueryArgs = {}) {
     const { sortBy, sortDir } = SortHelper.safeSortParams(
@@ -57,8 +60,51 @@ export class RoutesService {
         orderBy: {
           [sortBy]: sortDir,
         },
+        skip: Number(params.skip ?? 0),
+        take:
+          Number(params.take) ||
+          this.config.get<DefaultsConfig>('defaults').defaultPaginationTake,
       })
       .then(this.computeVirtualProperties.bind(this));
+  }
+
+  async getMinMaxGradeForUser(authorId: string) {
+    return await this.prisma.route
+      .aggregate({
+        where: {
+          authorId,
+        },
+        _max: {
+          grade: true,
+        },
+        _min: {
+          grade: true,
+        },
+      })
+      .then((result) => ({
+        max: result._max,
+        min: result._min,
+      }));
+  }
+
+  async getMinMaxGradeForZone(authorId: string, zoneId: string) {
+    return await this.prisma.route
+      .aggregate({
+        where: {
+          zoneId,
+          authorId,
+        },
+        _max: {
+          grade: true,
+        },
+        _min: {
+          grade: true,
+        },
+      })
+      .then((result) => ({
+        max: result._max,
+        min: result._min,
+      }));
   }
 
   async getRandomRoute(userId: string, params: RouteQueryArgs = {}) {
@@ -133,6 +179,10 @@ export class RoutesService {
         orderBy: {
           [sortBy]: sortDir,
         },
+        skip: Number(params.skip ?? 0),
+        take:
+          Number(params.take) ||
+          this.config.get<DefaultsConfig>('defaults').defaultPaginationTake,
       })
       .then(this.computeVirtualProperties.bind(this));
   }

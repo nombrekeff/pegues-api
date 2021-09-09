@@ -19,7 +19,7 @@ import { Route } from 'src/models/route.model';
 import { Role, User } from 'src/models/user.model';
 import { Zone } from 'src/models/zone.model';
 import { CreateZoneInput } from 'src/resolvers/zone/dto/create-zone.input';
-import { RoutesService } from 'src/services/route.service';
+import { RouteService } from 'src/services/route.service';
 import { ZonesService } from 'src/services/zones.service';
 
 @Controller('')
@@ -28,7 +28,7 @@ import { ZonesService } from 'src/services/zones.service';
 export class ZonesController {
   constructor(
     private readonly zoneService: ZonesService,
-    private readonly routeService: RoutesService
+    private readonly routeService: RouteService
   ) {}
 
   @Get('zones')
@@ -43,6 +43,11 @@ export class ZonesController {
   async getSingleZone(@CurrentUser() user: User, @Param('id') id: string) {
     const zone = await this.zoneService.getOne(user.id, id);
     return zone;
+  }
+
+  @Get('zones/:id/min_max_grade')
+  async getMaxGrade(@CurrentUser() user: User, @Param('id') id: string) {
+    return await this.routeService.getMinMaxGradeForZone(user.id, id);
   }
 
   @Get('admin/zones')

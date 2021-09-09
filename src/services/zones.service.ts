@@ -38,6 +38,8 @@ export class ZonesService {
         orderBy: {
           [sortBy]: sortDir,
         },
+        skip: Number(params.skip ?? 0),
+        take: Number(params.take ?? 0),
       })
       .then((zones) => this.computeVirtualProperties(zones));
   }
@@ -59,6 +61,8 @@ export class ZonesService {
         orderBy: {
           [sortBy]: sortDir,
         },
+        skip: Number(params.skip ?? 0),
+        take: Number(params.take ?? 0),
       })
       .then((zones) => this.computeVirtualProperties(zones));
   }
