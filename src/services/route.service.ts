@@ -11,7 +11,7 @@ import { UpdateRouteInput } from 'src/resolvers/route/dto/update-route.input';
 import { searchByQuery } from 'src/common/common_queries';
 import { RouteQueryArgs } from 'src/models/args/route-query.args';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
-import { HttpResponse } from 'src/common/response';
+import { HttpResponse } from 'src/common/responses/http_response';
 
 @Injectable()
 export class RoutesService {

@@ -38,6 +38,13 @@ export class ZonesController {
     return zones;
   }
 
+  @Get('zones/:id')
+  @ApiResponse({ type: () => Zone, status: 200 })
+  async getSingleZone(@CurrentUser() user: User, @Param('id') id: string) {
+    const zone = await this.zoneService.getOne(user.id, id);
+    return zone;
+  }
+
   @Get('admin/zones')
   @ApiResponse({ type: () => Zone, isArray: true, status: 200 })
   async getAdminZones(@Query() query: ZoneQueryArgs, @IsRole([Role.ADMIN]) _) {

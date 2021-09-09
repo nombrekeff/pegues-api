@@ -12,7 +12,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
-import { HttpResponse } from 'src/common/response';
+import { HttpResponse } from 'src/common/responses/http_response';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { AscentQueryArgs } from 'src/models/args/ascent-query.args';
 import { RouteQueryArgs } from 'src/models/args/route-query.args';
@@ -33,7 +33,7 @@ export class RoutesController {
   ) {}
 
   @Get('')
-  @ApiResponse({ status: 200, type: Route, isArray: true })
+  @ApiResponse({ status: 200, type: HttpResponse, isArray: true })
   async getMyRoutes(@CurrentUser() user: User, @Query() query: RouteQueryArgs) {
     return this.routeService.getAllForUser(user.id, query);
   }

@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum } from 'class-validator';
+
 export interface HttpResponse<T> {
   code: HttpStatus;
   data: T;
@@ -8,8 +8,16 @@ export interface HttpResponse<T> {
 }
 
 export class HttpResponse<T = any> implements HttpResponse {
-  static ok<T>(data?: T, message: string = ''): HttpResponse<T> {
+  static ok<T>(data?: T, message?: string): HttpResponse<T> {
     return new HttpResponse(HttpStatus.OK, data, message);
+  }
+
+  static notFound<T>(data?: T, message?: string): HttpResponse<T> {
+    return new HttpResponse(HttpStatus.NOT_FOUND, data, message);
+  }
+
+  static badRequest<T>(data?: T, message?: string): HttpResponse<T> {
+    return new HttpResponse(HttpStatus.BAD_REQUEST, data, message);
   }
 
   @ApiProperty()

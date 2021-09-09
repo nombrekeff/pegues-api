@@ -1,5 +1,11 @@
-import { ConflictException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { Zone, Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { searchByQuery } from 'src/common/common_queries';
 import { ErrorCodes } from 'src/common/error_codes';
@@ -33,26 +39,7 @@ export class ZonesService {
           [sortBy]: sortDir,
         },
       })
-      .then(async (zones) => {
-        const withCount = [];
-
-        for (const zone of zones) {
-          const whereZoneId = {
-            where: {
-              zoneId: zone.id,
-            },
-          };
-
-          const count = await this.prisma.route.count(whereZoneId);
-
-          withCount.push({
-            ...zone,
-            totalRoutes: count,
-          });
-        }
-
-        return withCount;
-      });
+      .then((zones) => this.computeVirtualProperties(zones));
   }
 
   getAll(params: ZoneQueryArgs = {}) {
@@ -73,26 +60,21 @@ export class ZonesService {
           [sortBy]: sortDir,
         },
       })
-      .then(async (zones) => {
-        const withCount = [];
+      .then((zones) => this.computeVirtualProperties(zones));
+  }
 
-        for (const zone of zones) {
-          const whereZoneId = {
-            where: {
-              zoneId: zone.id,
-            },
-          };
-
-          const count = await this.prisma.route.count(whereZoneId);
-
-          withCount.push({
-            ...zone,
-            totalRoutes: count,
-          });
-        }
-
-        return withCount;
-      });
+  getOne(authorId: string, id: string) {
+    return this.prisma.zone
+      .findFirst({
+        where: {
+          id,
+          authorId,
+        },
+        include: {
+          routes: true,
+        },
+      })
+      .then((zone) => this.computeVirtualForZone(zone));
   }
 
   async create(userId: string, zoneData: CreateZoneInput) {
@@ -134,7 +116,8 @@ export class ZonesService {
         e.code === 'P2002'
       ) {
         throw new ConflictException(`Zone '${zoneData.name}' already used.`);
-      }if (
+      }
+      if (
         e instanceof Prisma.PrismaClientKnownRequestError &&
         e.code === 'P2025'
       ) {
@@ -160,12 +143,38 @@ export class ZonesService {
         e instanceof PrismaClientKnownRequestError &&
         e.code == ErrorCodes.targetNotFound
       ) {
-        throw new HttpException(
-          `Zone "${id}" not found`,
-          HttpStatus.NOT_FOUND
-        );
+        throw new HttpException(`Zone "${id}" not found`, HttpStatus.NOT_FOUND);
       }
       throw new Error(e);
     }
+  }
+
+  async computeVirtualProperties(zones: Zone[]) {
+    const computedZones = [];
+
+    for (const zone of zones) {
+      computedZones.push(await this.computeVirtualForZone(zone));
+    }
+
+    return computedZones;
+  }
+
+  private async computeVirtualForZone(zone: Zone) {
+    const whereZoneId = {
+      zoneId: zone.id,
+    };
+
+    const totalRoutes = await this.prisma.route.count({ where: whereZoneId });
+    const totalAscents = await this.prisma.ascent.count({
+      where: {
+        route: whereZoneId,
+      },
+    });
+
+    return {
+      ...zone,
+      totalRoutes,
+      totalAscents,
+    };
   }
 }
