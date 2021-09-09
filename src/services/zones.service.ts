@@ -2,7 +2,6 @@ import {
   ConflictException,
   HttpException,
   HttpStatus,
-  Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { Zone, Prisma } from '@prisma/client';
@@ -12,18 +11,17 @@ import { ErrorCodes } from 'src/common/error_codes';
 import { SortHelper } from 'src/common/sort_helper';
 import { ZoneQueryArgs } from 'src/models/args/zone-query.args';
 import { zoneSortParams } from 'src/models/zone.model';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateZoneInput } from 'src/resolvers/zone/dto/create-zone.input';
 import { EditZoneInput } from 'src/resolvers/zone/dto/edit-zone.input';
+import { BaseService } from './base.service';
 
-@Injectable()
-export class ZonesService {
-  constructor(private prisma: PrismaService) {}
-
+export class ZonesService extends BaseService {
   getZonesForUser(userId: string, params: ZoneQueryArgs = {}) {
     const { sortBy, sortDir } = SortHelper.safeSortParams(
       params,
-      zoneSortParams
+      zoneSortParams,
+      this.defaults.sortBy,
+      this.defaults.sortDir
     );
 
     return this.prisma.zone
@@ -39,7 +37,7 @@ export class ZonesService {
           [sortBy]: sortDir,
         },
         skip: Number(params.skip ?? 0),
-        take: Number(params.take ?? 0),
+        take: Number(params.take) || this.defaults.defaultPaginationTake,
       })
       .then((zones) => this.computeVirtualProperties(zones));
   }
@@ -47,7 +45,9 @@ export class ZonesService {
   getAll(params: ZoneQueryArgs = {}) {
     const { sortBy, sortDir } = SortHelper.safeSortParams(
       params,
-      zoneSortParams
+      zoneSortParams,
+      this.defaults.sortBy,
+      this.defaults.sortDir
     );
 
     return this.prisma.zone
@@ -62,7 +62,7 @@ export class ZonesService {
           [sortBy]: sortDir,
         },
         skip: Number(params.skip ?? 0),
-        take: Number(params.take ?? 0),
+        take: Number(params.take) || this.defaults.defaultPaginationTake,
       })
       .then((zones) => this.computeVirtualProperties(zones));
   }

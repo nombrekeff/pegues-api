@@ -5,6 +5,8 @@ export const config: Config = {
   docsUrl: 'https://mis-pegues.com/api',
   defaults: {
     defaultPaginationTake: 15,
+    sortBy: 'createdAt',
+    sortDir: 'asc'
   },
   nest: {
     port: 3000,

@@ -1,8 +1,5 @@
 import { AscentModule } from './resolvers/ascent/ascent.module';
-import { GraphQLModule } from '@nestjs/graphql';
 import { MiddlewareConsumer, Module } from '@nestjs/common';
-import { AppController } from './controllers/app.controller';
-import { AppService } from './services/app.service';
 import { AuthModule } from './resolvers/auth/auth.module';
 import { UserModule } from './resolvers/user/user.module';
 import { AppResolver } from './resolvers/app.resolver';
@@ -33,7 +30,6 @@ import { RolesGuard } from './guards/roles.guard';
     UserPreferencesModule,
   ],
   controllers: [
-    AppController,
     AuthController,
     UserController,
     ZonesController,
@@ -42,7 +38,6 @@ import { RolesGuard } from './guards/roles.guard';
     UserPreferencesController,
   ],
   providers: [
-    AppService,
     AppResolver,
     DateScalar,
     {

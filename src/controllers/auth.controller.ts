@@ -5,7 +5,6 @@ import { RefreshData } from 'src/models/dto/refresh.dto';
 import { Token } from 'src/models/token.model';
 import { SignupInput } from 'src/resolvers/auth/dto/signup.input';
 import { AuthService } from 'src/services/auth.service';
-import { AppService } from '../services/app.service';
 
 @Controller('auth')
 @ApiTags('auth')

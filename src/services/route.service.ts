@@ -1,31 +1,27 @@
 import { HttpStatus } from '@nestjs/common';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { HttpException } from '@nestjs/common/exceptions';
 import { Prisma, Route } from '@prisma/client';
 import { ErrorCodes } from 'src/common/error_codes';
 import { SortHelper } from 'src/common/sort_helper';
 import { routeSortParams } from 'src/models/route.model';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateRouteInput } from 'src/resolvers/route/dto/create-route.input';
 import { UpdateRouteInput } from 'src/resolvers/route/dto/update-route.input';
 import { searchByQuery } from 'src/common/common_queries';
 import { RouteQueryArgs } from 'src/models/args/route-query.args';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
-import { HttpResponse } from 'src/common/responses/http_response';
-import { AscentQueryArgs } from 'src/models/args/ascent-query.args';
-import { ConfigService } from '@nestjs/config';
+import { BaseService } from './base.service';
 import { DefaultsConfig } from 'src/configs/config.interface';
+import { HttpResponse } from 'src/common/responses/http_response';
 
 @Injectable()
-export class RouteService {
-  private readonly logger = new Logger('routes');
-
-  constructor(private prisma: PrismaService, public config: ConfigService) {}
-
+export class RouteService extends BaseService {
   async getAllForUser(userId: string, params: RouteQueryArgs = {}) {
     const { sortBy, sortDir } = SortHelper.safeSortParams(
       params,
-      routeSortParams
+      routeSortParams,
+      this.defaults.sortBy,
+      this.defaults.sortDir
     );
 
     return await this.prisma.route
@@ -61,9 +57,7 @@ export class RouteService {
           [sortBy]: sortDir,
         },
         skip: Number(params.skip ?? 0),
-        take:
-          Number(params.take) ||
-          this.config.get<DefaultsConfig>('defaults').defaultPaginationTake,
+        take: Number(params.take) || this.defaults.defaultPaginationTake,
       })
       .then(this.computeVirtualProperties.bind(this));
   }
