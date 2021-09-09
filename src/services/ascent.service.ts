@@ -1,7 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { Injectable, Logger } from '@nestjs/common';
 import { HttpException } from '@nestjs/common/exceptions';
-import { Prisma } from '@prisma/client';
+import { Ascent, Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { searchByQuery } from 'src/common/common_queries';
 import { ErrorCodes } from 'src/common/error_codes';
@@ -28,6 +28,18 @@ export class AscentService {
     params: AscentQueryArgs = {}
   ) {
     return this._getAllWhere({ routeId, authorId }, params);
+  }
+
+  async getOne(authorId: string, ascentId: string): Promise<Ascent> {
+    return await this.prisma.ascent.findFirst({
+      where: {
+        authorId,
+        id: ascentId,
+      },
+      include: {
+        route: true,
+      },
+    });
   }
 
   async getAllForZone(zoneId: string, params: AscentQueryArgs = {}) {

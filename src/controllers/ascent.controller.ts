@@ -38,6 +38,12 @@ export class AscentController {
     return this.service.getAllForUser(user.id, query);
   }
 
+  @Get(':id')
+  @ApiResponse({ status: 200, type: () => Ascent })
+  async getSingle(@CurrentUser() user: User, @Param('id') id: string) {
+    return this.service.getOne(user.id, id);
+  }
+
   @Post('')
   @ApiResponse({ type: () => Ascent, status: 200 })
   async add(@CurrentUser() user: User, @Body() data: CreateAscentInput) {

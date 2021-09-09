@@ -78,7 +78,7 @@ export class ZonesController {
     return await this.zoneService.update(user.id, id, data);
   }
 
-  @Delete(':id')
+  @Delete('zones/:id')
   async deleteZone(@CurrentUser() user: User, @Param('id') id: string) {
     return this.zoneService.remove(user.id, id);
   }

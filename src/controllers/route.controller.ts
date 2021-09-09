@@ -44,6 +44,12 @@ export class RoutesController {
     return this.routeService.getRandomRoute(user.id, query);
   }
 
+  @Get(':id')
+  @ApiResponse({ status: 200, type: HttpResponse })
+  async getSingle(@CurrentUser() user: User, @Param('id') id: string) {
+    return this.routeService.getOne(user.id, id);
+  }
+  
   @Get(':id/ascents')
   @ApiResponse({ status: 200, type: Ascent, isArray: true })
   async getAscentsForRoute(

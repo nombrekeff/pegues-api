@@ -1,7 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { Injectable, Logger } from '@nestjs/common';
 import { HttpException } from '@nestjs/common/exceptions';
-import { Prisma } from '@prisma/client';
+import { Prisma, Route } from '@prisma/client';
 import { ErrorCodes } from 'src/common/error_codes';
 import { SortHelper } from 'src/common/sort_helper';
 import { routeSortParams } from 'src/models/route.model';
@@ -25,7 +25,7 @@ export class RoutesService {
       routeSortParams
     );
 
-    const routes = await this.prisma.route
+    return await this.prisma.route
       .findMany({
         where: {
           AND: {
@@ -58,26 +58,7 @@ export class RoutesService {
           [sortBy]: sortDir,
         },
       })
-      .then(async (routes) => {
-        const withCount = [];
-
-        for (const route of routes) {
-          const count = await this.prisma.ascent.count({
-            where: {
-              routeId: route.id,
-            },
-          });
-
-          withCount.push({
-            ...route,
-            ascentCount: count,
-          });
-        }
-
-        return withCount;
-      });
-
-    return routes;
+      .then(this.computeVirtualProperties.bind(this));
   }
 
   async getRandomRoute(userId: string, params: RouteQueryArgs = {}) {
@@ -126,7 +107,7 @@ export class RoutesService {
       routeSortParams
     );
 
-    const routes = await this.prisma.route
+    return await this.prisma.route
       .findMany({
         where: {
           AND: {
@@ -153,26 +134,22 @@ export class RoutesService {
           [sortBy]: sortDir,
         },
       })
-      .then(async (routes) => {
-        const withCount = [];
+      .then(this.computeVirtualProperties.bind(this));
+  }
 
-        for (const route of routes) {
-          const count = await this.prisma.ascent.count({
-            where: {
-              routeId: route.id,
-            },
-          });
-
-          withCount.push({
-            ...route,
-            ascentCount: count,
-          });
-        }
-
-        return withCount;
-      });
-
-    return routes;
+  async getOne(authorId: string, routeId: string): Promise<Route> {
+    return await this.prisma.route
+      .findFirst({
+        where: {
+          authorId,
+          id: routeId,
+        },
+        include: {
+          zone: true,
+          ascents: true,
+        },
+      })
+      .then(this.computeVirtualForRoute.bind(this));
   }
 
   async createRoute(userId: string, routeData: CreateRouteInput) {
@@ -255,5 +232,28 @@ export class RoutesService {
       }
       throw new Error(e);
     }
+  }
+
+  private async computeVirtualProperties(routes: Route[]) {
+    const withCount = [];
+
+    for (const route of routes) {
+      withCount.push(await this.computeVirtualForRoute(route));
+    }
+
+    return withCount;
+  }
+
+  private async computeVirtualForRoute(route: Route) {
+    const totalAscents = await this.prisma.ascent.count({
+      where: {
+        routeId: route.id,
+      },
+    });
+
+    return {
+      ...route,
+      totalAscents,
+    };
   }
 }
