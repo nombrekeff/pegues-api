@@ -10,9 +10,9 @@ import { UpdateRouteInput } from 'src/resolvers/route/dto/update-route.input';
 import { searchByQuery } from 'src/common/common_queries';
 import { RouteQueryArgs } from 'src/models/args/route-query.args';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
-import { BaseService } from './base.service';
 import { DefaultsConfig } from 'src/configs/config.interface';
 import { HttpResponse } from 'src/common/responses/http_response';
+import { BaseService } from './base.service';
 
 @Injectable()
 export class RouteService extends BaseService {

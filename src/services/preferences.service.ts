@@ -1,12 +1,10 @@
 import { CreateUserPreferenceInput } from './../models/dto/create_user_pref.dto';
-import { PrismaService } from '../prisma/prisma.service';
 import { ConflictException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { BaseService } from './base.service';
 
 @Injectable()
-export class UserPreferencesService {
-  constructor(private prisma: PrismaService) {}
-
+export class UserPreferencesService extends BaseService {
   findForUser(authorId: string) {
     return this.prisma.userPreferences.findFirst({
       where: { authorId },

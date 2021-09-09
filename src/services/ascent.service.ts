@@ -1,25 +1,19 @@
 import { HttpStatus } from '@nestjs/common';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { HttpException } from '@nestjs/common/exceptions';
-import { ConfigService } from '@nestjs/config';
 import { Ascent, Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { searchByQuery } from 'src/common/common_queries';
 import { ErrorCodes } from 'src/common/error_codes';
 import { SortHelper } from 'src/common/sort_helper';
-import { DefaultsConfig } from 'src/configs/config.interface';
 import { AscentQueryArgs } from 'src/models/args/ascent-query.args';
 import { ascentSortParams } from 'src/models/ascent.model';
 import { CreateAscentInput } from 'src/models/dto/create_ascent.dto';
 import { UpdateAscentInput } from 'src/models/dto/update_ascent.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { BaseService } from './base.service';
 
 @Injectable()
-export class AscentService {
-  private readonly logger = new Logger('ascent');
-
-  constructor(private prisma: PrismaService, private config: ConfigService) {}
-
+export class AscentService extends BaseService {
   async getAllForUser(authorId: string, params: AscentQueryArgs = {}) {
     return this._getAllWhere({ authorId }, params);
   }
@@ -93,9 +87,7 @@ export class AscentService {
         [sortBy]: sortDir,
       },
       skip: Number(params.skip ?? 0),
-      take:
-        Number(params.take) ||
-        this.config.get<DefaultsConfig>('defaults').defaultPaginationTake,
+      take: Number(params.take) || this.defaults.defaultPaginationTake,
     });
 
     return ascents;

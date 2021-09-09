@@ -2,6 +2,7 @@ import {
   ConflictException,
   HttpException,
   HttpStatus,
+  Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { Zone, Prisma } from '@prisma/client';
@@ -15,6 +16,7 @@ import { CreateZoneInput } from 'src/resolvers/zone/dto/create-zone.input';
 import { EditZoneInput } from 'src/resolvers/zone/dto/edit-zone.input';
 import { BaseService } from './base.service';
 
+@Injectable()
 export class ZonesService extends BaseService {
   getZonesForUser(userId: string, params: ZoneQueryArgs = {}) {
     const { sortBy, sortDir } = SortHelper.safeSortParams(
