@@ -1,4 +1,3 @@
-import { PrismaService } from './../prisma/prisma.service';
 import {
   Injectable,
   NotFoundException,
@@ -9,20 +8,19 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { PasswordService } from './password.service';
 import { SignupInput } from '../resolvers/auth/dto/signup.input';
-import { Prisma, RouteDiscipline, User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { Token } from '../models/token.model';
-import { ConfigService } from '@nestjs/config';
-import { SecurityConfig } from 'src/configs/config.interface';
 import { UserPreferences } from 'src/models/user-preferences.model';
+import { BaseService } from './base.service';
 
 @Injectable()
-export class AuthService {
+export class AuthService extends BaseService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly prisma: PrismaService,
-    private readonly passwordService: PasswordService,
-    private readonly configService: ConfigService
-  ) {}
+    private readonly passwordService: PasswordService
+  ) {
+    super();
+  }
 
   async createUser(payload: SignupInput): Promise<Token> {
     const hashedPassword = await this.passwordService.hashPassword(
@@ -35,7 +33,7 @@ export class AuthService {
           ...payload,
           preferences: {
             create: {
-              ...UserPreferences.defaultPrefereneces
+              ...UserPreferences.defaultPrefereneces,
             },
           },
           password: hashedPassword,
@@ -100,17 +98,16 @@ export class AuthService {
   }
 
   private generateRefreshToken(payload: { userId: string }): string {
-    const securityConfig = this.configService.get<SecurityConfig>('security');
     return this.jwtService.sign(payload, {
-      secret: this.configService.get('JWT_REFRESH_SECRET'),
-      expiresIn: securityConfig.refreshIn,
+      secret: this.config.get('JWT_REFRESH_SECRET'),
+      expiresIn: this.securityConfig.refreshIn,
     });
   }
 
   refreshToken(token: string) {
     try {
       const { userId } = this.jwtService.verify(token, {
-        secret: this.configService.get('JWT_REFRESH_SECRET'),
+        secret: this.config.get('JWT_REFRESH_SECRET'),
       });
 
       return this.generateTokens({

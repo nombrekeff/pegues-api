@@ -1,3 +1,5 @@
+import { SortOrder } from 'src/types';
+
 export interface Config {
   env: 'pre' | 'prod';
   defaults: DefaultsConfig;
@@ -11,6 +13,8 @@ export interface Config {
 
 export interface DefaultsConfig {
   defaultPaginationTake: number;
+  sortBy: string;
+  sortDir: SortOrder;
 }
 
 export interface NestConfig {

@@ -7,7 +7,6 @@ import { User } from 'src/models/user.model';
 import { AscentService } from 'src/services/ascent.service';
 import { RouteService } from 'src/services/route.service';
 import { UserService } from 'src/services/user.service';
-import { AppService } from '../services/app.service';
 
 @Controller('user')
 @ApiTags('user')

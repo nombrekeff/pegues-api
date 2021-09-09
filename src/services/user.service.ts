@@ -1,15 +1,14 @@
-import { PrismaService } from './../prisma/prisma.service';
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PasswordService } from './password.service';
 import { ChangePasswordInput } from '../resolvers/user/dto/change-password.input';
 import { UpdateUserInput } from '../resolvers/user/dto/update-user.input';
+import { BaseService } from './base.service';
 
 @Injectable()
-export class UserService {
-  constructor(
-    private prisma: PrismaService,
-    private passwordService: PasswordService
-  ) {}
+export class UserService extends BaseService {
+  constructor(private passwordService: PasswordService) {
+    super();
+  }
 
   findUser(userId: string) {
     return this.prisma.user
