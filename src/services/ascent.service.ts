@@ -99,7 +99,7 @@ export class AscentService extends BaseService {
         data: {
           authorId: userId,
           routeId: data.routeId,
-          ascentAt: data.ascentAt,
+          ascentAt: new Date(data.ascentAt),
           sessions: data.sessions,
           tries: data.tries,
         },

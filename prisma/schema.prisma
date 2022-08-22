@@ -84,7 +84,7 @@ model UserPreferences {
   preferredDiscipline RouteDiscipline @default(lead)
 
   author    User?     @relation(fields: [authorId], references: [id])
-  authorId  String?   
+  authorId  String?    @unique
   @@unique([authorId, id])
 }
 
@@ -102,7 +102,6 @@ enum Role {
 }
 
 enum Grade {
-  uknown  
   g3
   g4
   g5
@@ -130,4 +129,5 @@ enum Grade {
 
   g9A
   g9AP
+  uknown  
 }

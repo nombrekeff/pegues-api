@@ -1,7 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 import { HttpException } from '@nestjs/common/exceptions';
-import { Prisma, Route } from '@prisma/client';
+import { Grade, Prisma, Route } from '@prisma/client';
 import { ErrorCodes } from 'src/common/error_codes';
 import { SortHelper } from 'src/common/sort_helper';
 import { routeSortParams } from 'src/models/route.model';
@@ -67,6 +67,7 @@ export class RouteService extends BaseService {
       .aggregate({
         where: {
           authorId,
+          NOT: { grade: Grade.uknown },
         },
         _max: {
           grade: true,
@@ -82,12 +83,12 @@ export class RouteService extends BaseService {
   }
 
   async getMinMaxGradeForZone(authorId: string, zoneId: string) {
+    let where = { zoneId, NOT: { grade: Grade.uknown }, ascents: { some: {} } };
+    if (authorId) where['authorId'] = authorId;
+
     return await this.prisma.route
       .aggregate({
-        where: {
-          zoneId,
-          authorId,
-        },
+        where: where,
         _max: {
           grade: true,
         },

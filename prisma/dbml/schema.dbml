@@ -74,7 +74,7 @@ Table UserPreferences {
   updatedAt DateTime [not null]
   preferredDiscipline RouteDiscipline [not null, default: 'lead']
   author User
-  authorId String
+  authorId String [unique]
 
   indexes {
     (authorId, id) [unique]
@@ -95,7 +95,6 @@ Enum RouteDiscipline {
 }
 
 Enum Grade {
-  uknown
   g3
   g4
   g5
@@ -119,6 +118,7 @@ Enum Grade {
   g8CP
   g9A
   g9AP
+  uknown
 }
 
 Ref: Zone.authorId > User.id

@@ -21,7 +21,14 @@ export class UserController {
   @Get('me')
   @ApiResponse({ type: User })
   async getUser(@CurrentUser() user: User) {
-    return this.userService.findUser(user.id);
+    return this.userService.findUser(user.id).then(async (v) => {
+      const stats = await this.routeService.getMinMaxGradeForUser(user.id);
+      return {
+        ...v,
+        maxGrade: stats.max.grade,
+        minGrade: stats.min.grade,
+      };
+    });
   }
 
   @Get('me/min_max_grade')

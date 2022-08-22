@@ -15,10 +15,15 @@ import { zoneSortParams } from 'src/models/zone.model';
 import { CreateZoneInput } from 'src/resolvers/zone/dto/create-zone.input';
 import { EditZoneInput } from 'src/resolvers/zone/dto/edit-zone.input';
 import { BaseService } from './base.service';
+import { RouteService } from './route.service';
 
 @Injectable()
 export class ZonesService extends BaseService {
-  getZonesForUser(userId: string, params: ZoneQueryArgs = {}) {
+  constructor(private readonly routeService: RouteService) {
+    super();
+  }
+
+  getZonesForUser(authorId: string, params: ZoneQueryArgs = {}) {
     const { sortBy, sortDir } = SortHelper.safeSortParams(
       params,
       zoneSortParams,
@@ -29,7 +34,7 @@ export class ZonesService extends BaseService {
     return this.prisma.zone
       .findMany({
         where: {
-          authorId: userId,
+          authorId: authorId,
           ...searchByQuery('name', params.search),
         },
         include: {
@@ -41,7 +46,7 @@ export class ZonesService extends BaseService {
         skip: Number(params.skip ?? 0),
         take: Number(params.take) || this.defaults.defaultPaginationTake,
       })
-      .then((zones) => this.computeVirtualProperties(zones));
+      .then((zones) => this.computeVirtualProperties(authorId, zones));
   }
 
   getAll(params: ZoneQueryArgs = {}) {
@@ -66,7 +71,7 @@ export class ZonesService extends BaseService {
         skip: Number(params.skip ?? 0),
         take: Number(params.take) || this.defaults.defaultPaginationTake,
       })
-      .then((zones) => this.computeVirtualProperties(zones));
+      .then((zones) => this.computeVirtualProperties(null, zones));
   }
 
   getOne(authorId: string, id: string) {
@@ -77,10 +82,14 @@ export class ZonesService extends BaseService {
           authorId,
         },
         include: {
-          routes: true,
+          routes: {
+            include: {
+              ascents: true,
+            },
+          },
         },
       })
-      .then((zone) => this.computeVirtualForZone(zone));
+      .then((zone) => this.computeVirtualForZone(authorId, zone));
   }
 
   async create(userId: string, zoneData: CreateZoneInput) {
@@ -155,17 +164,17 @@ export class ZonesService extends BaseService {
     }
   }
 
-  async computeVirtualProperties(zones: Zone[]) {
+  async computeVirtualProperties(authorId, zones: Zone[]) {
     const computedZones = [];
 
     for (const zone of zones) {
-      computedZones.push(await this.computeVirtualForZone(zone));
+      computedZones.push(await this.computeVirtualForZone(authorId, zone));
     }
 
     return computedZones;
   }
 
-  private async computeVirtualForZone(zone: Zone) {
+  private async computeVirtualForZone(userId: string, zone: Zone) {
     const whereZoneId = {
       zoneId: zone.id,
     };
@@ -176,9 +185,14 @@ export class ZonesService extends BaseService {
         route: whereZoneId,
       },
     });
+    const minMax = await this.routeService.getMinMaxGradeForZone(
+      userId,
+      zone.id
+    );
 
     return {
       ...zone,
+      ...minMax,
       totalRoutes,
       totalAscents,
     };
