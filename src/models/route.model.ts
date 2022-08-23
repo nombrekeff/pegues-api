@@ -1,7 +1,8 @@
 import { User } from './user.model';
-import { BaseModel, baseSortParams, ValidBaseSortParams } from './base.model';
+import { BaseModel, baseSortParams } from './base.model';
 import { Zone } from './zone.model';
 import { Ascent } from './ascent.model';
+import { Session } from './session.model';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 
 export enum Grade {
@@ -68,6 +69,12 @@ export class Route extends BaseModel {
 
   @ApiProperty({ type: () => Ascent, isArray: true })
   ascents: Ascent[] = [];
+
+  @ApiProperty({ type: () => Session, isArray: true })
+  sessions: Session[] = [];
+
+  @ApiProperty({ default: false })
+  hasAscents: boolean;
 
   @ApiProperty({ enum: Grade, default: Grade.uknown })
   grade?: Grade | null = Grade.uknown;

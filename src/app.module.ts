@@ -17,6 +17,8 @@ import { UserPreferencesController } from './controllers/user-preferences.contro
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './guards/roles.guard';
 import { join } from 'path';
+import { SessionModule } from './resolvers/session/session.module';
+import { SessionsController } from './controllers/sessions.controller';
 
 @Module({
   imports: [
@@ -26,6 +28,7 @@ import { join } from 'path';
     ZoneModule,
     RouteModule,
     AscentModule,
+    SessionModule,
     UserPreferencesModule,
   ],
   controllers: [
@@ -34,6 +37,7 @@ import { join } from 'path';
     ZonesController,
     RoutesController,
     AscentController,
+    SessionsController,
     UserPreferencesController,
   ],
   providers: [

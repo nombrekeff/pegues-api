@@ -1,36 +1,38 @@
 import { HttpStatus } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 import { HttpException } from '@nestjs/common/exceptions';
-import { Ascent, Prisma } from '@prisma/client';
+import { Prisma, Session } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { searchByQuery } from 'src/common/common_queries';
 import { ErrorCodes } from 'src/common/error_codes';
 import { SortHelper } from 'src/common/sort_helper';
-import { AscentQueryArgs } from 'src/models/args/ascent-query.args';
+import { SessionQueryArgs } from 'src/models/args/session-query.args';
 import { ascentSortParams } from 'src/models/ascent.model';
 import { CreateAscentInput } from 'src/models/dto/create_ascent.dto';
+import { CreateSessionInput } from 'src/models/dto/create_session.dto';
 import { UpdateAscentInput } from 'src/models/dto/update_ascent.dto';
+import { UpdateSessionInput } from 'src/models/dto/update_session.dto';
 import { BaseService } from './base.service';
 
 @Injectable()
-export class AscentService extends BaseService {
-  async getAllForUser(authorId: string, params: AscentQueryArgs = {}) {
+export class SessionService extends BaseService {
+  async getAllForUser(authorId: string, params: SessionQueryArgs = {}) {
     return this._getAllWhere({ authorId }, params);
   }
 
   async getAllForRoute(
     authorId: string,
     routeId: string,
-    params: AscentQueryArgs = {}
+    params: SessionQueryArgs = {}
   ) {
     return this._getAllWhere({ routeId, authorId }, params);
   }
 
-  async getOne(authorId: string, ascentId: string): Promise<Ascent> {
-    return await this.prisma.ascent.findFirst({
+  async getOne(authorId: string, sessionId: string): Promise<Session> {
+    return await this.prisma.session.findFirst({
       where: {
         authorId,
-        id: ascentId,
+        id: sessionId,
       },
       include: {
         route: true,
@@ -38,17 +40,17 @@ export class AscentService extends BaseService {
     });
   }
 
-  async getAllForZone(zoneId: string, params: AscentQueryArgs = {}) {
+  async getAllForZone(zoneId: string, params: SessionQueryArgs = {}) {
     return this._getAllWhere({ route: { zone: { id: zoneId } } }, params);
   }
 
-  private async _getAllWhere(where: any, params: AscentQueryArgs = {}) {
+  private async _getAllWhere(where: any, params: SessionQueryArgs = {}) {
     const { sortBy, sortDir } = SortHelper.safeSortParams(
       params,
       ascentSortParams
     );
 
-    const ascents = await this.prisma.ascent.findMany({
+    const ascents = await this.prisma.session.findMany({
       where: {
         AND: {
           ...(params.routeId
@@ -61,6 +63,11 @@ export class AscentService extends BaseService {
                 route: { zoneId: params.routeId },
               }
             : {}),
+            ...(params.ascent
+              ? {
+                  ascent: params.ascent == 'true',
+                }
+              : {}),
         },
         OR: [
           {
@@ -93,16 +100,19 @@ export class AscentService extends BaseService {
     return ascents;
   }
 
-  async create(userId: string, data: CreateAscentInput) {
+  async create(userId: string, data: CreateSessionInput) {
     try {
-      const route = await this.prisma.ascent.create({
+      const route = await this.prisma.session.create({
         data: {
           authorId: userId,
           routeId: data.routeId,
-          ascentAt: data.ascentAt
-            ? new Date(data.ascentAt)
-            : new Date(Date.now()),
-          sessions: data.sessions,
+          // Only set [ascentAt] if ascent is true
+          ascentAt: data.ascent
+            ? data.ascentAt
+              ? new Date(data.ascentAt)
+              : new Date(Date.now())
+            : null,
+          ascent: data.ascent,
           tries: data.tries,
         },
       });
@@ -122,17 +132,16 @@ export class AscentService extends BaseService {
     }
   }
 
-  async update(id: string, data: UpdateAscentInput) {
+  async update(id: string, data: UpdateSessionInput) {
     try {
-      const route = await this.prisma.ascent.update({
+      const route = await this.prisma.session.update({
         where: {
           id: id,
         },
         data: {
-          routeId: data.routeId,
           ascentAt: data.ascentAt,
-          sessions: data.sessions,
           tries: data.tries,
+          ascent: data.ascent,
         },
       });
       return route;
@@ -143,7 +152,7 @@ export class AscentService extends BaseService {
 
   async remove(userId: string, id: string) {
     try {
-      const ascent = await this.prisma.ascent.delete({
+      const ascent = await this.prisma.session.delete({
         where: {
           authorId_id: { id: id, authorId: userId },
         },

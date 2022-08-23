@@ -13,6 +13,7 @@ Table User {
   zones Zone [not null]
   routes Route [not null]
   ascents Ascent [not null]
+  sessions Session [not null]
   roles Role [not null]
   preferences UserPreferences
 }
@@ -45,6 +46,7 @@ Table Route {
   zone Zone
   zoneId String
   ascents Ascent [not null]
+  sessions Session [not null]
 
   indexes {
     (authorId, id) [unique]
@@ -61,6 +63,23 @@ Table Ascent {
   authorId String
   ascentAt DateTime
   sessions Int [not null, default: 0]
+  tries Int [not null, default: 0]
+
+  indexes {
+    (authorId, id) [unique]
+  }
+}
+
+Table Session {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  route Route
+  routeId String [not null]
+  author User
+  authorId String
+  ascentAt DateTime
+  ascent Boolean [not null, default: false]
   tries Int [not null, default: 0]
 
   indexes {
@@ -130,5 +149,9 @@ Ref: Route.zoneId > Zone.id
 Ref: Ascent.routeId > Route.id
 
 Ref: Ascent.authorId > User.id
+
+Ref: Session.routeId > Route.id
+
+Ref: Session.authorId > User.id
 
 Ref: UserPreferences.authorId - User.id

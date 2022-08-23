@@ -37,16 +37,16 @@ export class ZonesService extends BaseService {
           authorId: authorId,
           ...searchByQuery('name', params.search),
         },
-        include: {
-          routes: true,
-        },
+        // include: {
+        //   routes: { include: { ascents: true } },
+        // },
         orderBy: {
           [sortBy]: sortDir,
         },
         skip: Number(params.skip ?? 0),
         take: Number(params.take) || this.defaults.defaultPaginationTake,
       })
-      .then((zones) => this.computeVirtualProperties(authorId, zones));
+      .then((zones) => this.computeVirtualPropertiesForZones(authorId, zones));
   }
 
   getAll(params: ZoneQueryArgs = {}) {
@@ -62,16 +62,16 @@ export class ZonesService extends BaseService {
         where: {
           ...searchByQuery('name', params.search),
         },
-        include: {
-          routes: true,
-        },
+        // include: {
+        //   routes: true,
+        // },
         orderBy: {
           [sortBy]: sortDir,
         },
         skip: Number(params.skip ?? 0),
         take: Number(params.take) || this.defaults.defaultPaginationTake,
       })
-      .then((zones) => this.computeVirtualProperties(null, zones));
+      .then((zones) => this.computeVirtualPropertiesForZones(null, zones));
   }
 
   getOne(authorId: string, id: string) {
@@ -81,13 +81,13 @@ export class ZonesService extends BaseService {
           id,
           authorId,
         },
-        include: {
-          routes: {
-            include: {
-              ascents: true,
-            },
-          },
-        },
+        // include: {
+        //   routes: {
+        //     include: {
+        //       ascents: true,
+        //     },
+        //   },
+        // },
       })
       .then((zone) => this.computeVirtualForZone(authorId, zone));
   }
@@ -164,7 +164,7 @@ export class ZonesService extends BaseService {
     }
   }
 
-  async computeVirtualProperties(authorId, zones: Zone[]) {
+  async computeVirtualPropertiesForZones(authorId, zones: Zone[]) {
     const computedZones = [];
 
     for (const zone of zones) {
@@ -179,6 +179,7 @@ export class ZonesService extends BaseService {
       zoneId: zone.id,
     };
 
+    const routes = await this.routeService.getAllForUser(userId, { zoneId: zone.id });
     const totalRoutes = await this.prisma.route.count({ where: whereZoneId });
     const totalAscents = await this.prisma.ascent.count({
       where: {
@@ -190,9 +191,22 @@ export class ZonesService extends BaseService {
       zone.id
     );
 
+    const projects = [];
+    const ascents = [];
+    for (let route of routes) {
+      if (route.ascents.length > 0) {
+        ascents.push(route);
+      } else {
+        projects.push(route);
+      }
+    }
+
     return {
       ...zone,
       ...minMax,
+      routes,
+      projects,
+      ascents,
       totalRoutes,
       totalAscents,
     };

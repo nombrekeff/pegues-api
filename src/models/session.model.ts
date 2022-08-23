@@ -4,15 +4,15 @@ import { Route } from './route.model';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { IsOptional } from 'class-validator';
 
-export const ascentSortParams = <const>[
+export const sessionSortParams = <const>[
   'tries',
-  'sessions',
   'ascentAt',
+  'ascent',
   ...baseSortParams,
 ];
-export type ValidAscentSortParams = typeof ascentSortParams[number];
+export type ValidSessionSortParams = typeof sessionSortParams[number];
 
-export class Ascent extends BaseModel {
+export class Session extends BaseModel {
   @ApiHideProperty()
   author: User;
 
@@ -24,7 +24,7 @@ export class Ascent extends BaseModel {
   ascentAt?: Date;
 
   @ApiProperty()
-  ascent: boolean = false;
+  sessions: number = 0;
 
   @ApiProperty()
   tries: number = 0;

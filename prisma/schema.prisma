@@ -23,6 +23,7 @@ model User {
   zones       Zone[]   
   routes      Route[]
   ascents     Ascent[]
+  sessions    Session[]
   roles       Role[]   
   preferences UserPreferences?
 }
@@ -57,6 +58,7 @@ model Route {
   zoneId      String?
 
   ascents     Ascent[]
+  sessions    Session[]
   @@unique([authorId, id])
 }
 
@@ -73,6 +75,23 @@ model Ascent {
 
   ascentAt    DateTime?
   sessions    Int       @default(0)
+  tries       Int       @default(0)
+  @@unique([authorId, id])
+}
+
+model Session {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  route        Route?   @relation(fields: [routeId], references: [id])
+  routeId      String
+
+  author      User?     @relation(fields: [authorId], references: [id])
+  authorId    String?   
+
+  ascentAt    DateTime?
+  ascent      Boolean   @default(false)
   tries       Int       @default(0)
   @@unique([authorId, id])
 }

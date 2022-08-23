@@ -51,7 +51,8 @@ export class RouteService extends BaseService {
         },
         include: {
           zone: true,
-          ascents: true,
+          sessions: true,
+          ascents: { include: { route: { include: { zone: true } } } },
         },
         orderBy: {
           [sortBy]: sortDir,
@@ -130,6 +131,7 @@ export class RouteService extends BaseService {
       include: {
         zone: true,
         ascents: true,
+        sessions: true,
       },
     });
 
@@ -170,6 +172,7 @@ export class RouteService extends BaseService {
         include: {
           zone: true,
           ascents: true,
+          sessions: true,
         },
         orderBy: {
           [sortBy]: sortDir,
@@ -192,6 +195,7 @@ export class RouteService extends BaseService {
         include: {
           zone: true,
           ascents: true,
+          sessions: true,
         },
       })
       .then(this.computeVirtualForRoute.bind(this));
@@ -299,6 +303,7 @@ export class RouteService extends BaseService {
     return {
       ...route,
       totalAscents,
+      hasAscents: totalAscents > 0,
     };
   }
 }
