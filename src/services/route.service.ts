@@ -294,15 +294,22 @@ export class RouteService extends BaseService {
   }
 
   private async computeVirtualForRoute(route: Route) {
-    const totalAscents = await this.prisma.ascent.count({
+    const totalSessions = await this.prisma.session.count({
       where: {
         routeId: route.id,
+      },
+    });
+    const totalAscents = await this.prisma.session.count({
+      where: {
+        routeId: route.id,
+        ascent: true,
       },
     });
 
     return {
       ...route,
       totalAscents,
+      totalSessions,
       hasAscents: totalAscents > 0,
     };
   }
