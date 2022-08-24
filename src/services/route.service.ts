@@ -51,8 +51,7 @@ export class RouteService extends BaseService {
         },
         include: {
           zone: true,
-          sessions: true,
-          ascents: { include: { route: { include: { zone: true } } } },
+          projects: true,
         },
         orderBy: {
           [sortBy]: sortDir,
@@ -61,46 +60,6 @@ export class RouteService extends BaseService {
         take: Number(params.take) || this.defaults.defaultPaginationTake,
       })
       .then(this.computeVirtualProperties.bind(this));
-  }
-
-  async getMinMaxGradeForUser(authorId: string) {
-    return await this.prisma.route
-      .aggregate({
-        where: {
-          authorId,
-          NOT: { grade: Grade.uknown },
-        },
-        _max: {
-          grade: true,
-        },
-        _min: {
-          grade: true,
-        },
-      })
-      .then((result) => ({
-        max: result._max,
-        min: result._min,
-      }));
-  }
-
-  async getMinMaxGradeForZone(authorId: string, zoneId: string) {
-    let where = { zoneId, NOT: { grade: Grade.uknown }, ascents: { some: {} } };
-    if (authorId) where['authorId'] = authorId;
-
-    return await this.prisma.route
-      .aggregate({
-        where: where,
-        _max: {
-          grade: true,
-        },
-        _min: {
-          grade: true,
-        },
-      })
-      .then((result) => ({
-        max: result._max,
-        min: result._min,
-      }));
   }
 
   async getRandomRoute(userId: string, params: RouteQueryArgs = {}) {
@@ -130,8 +89,7 @@ export class RouteService extends BaseService {
       },
       include: {
         zone: true,
-        ascents: true,
-        sessions: true,
+        projects: true,
       },
     });
 
@@ -144,7 +102,7 @@ export class RouteService extends BaseService {
     return HttpResponse.ok(null, 'No route found');
   }
 
-  async getAll(params: RouteQueryArgs = {}) {
+  async getAll(userId: string, params: RouteQueryArgs = {}) {
     const { sortBy, sortDir } = SortHelper.safeSortParams(
       params,
       routeSortParams
@@ -171,8 +129,7 @@ export class RouteService extends BaseService {
         },
         include: {
           zone: true,
-          ascents: true,
-          sessions: true,
+          projects: true,
         },
         orderBy: {
           [sortBy]: sortDir,
@@ -194,8 +151,7 @@ export class RouteService extends BaseService {
         },
         include: {
           zone: true,
-          ascents: true,
-          sessions: true,
+          projects: true,
         },
       })
       .then(this.computeVirtualForRoute.bind(this));
@@ -296,13 +252,19 @@ export class RouteService extends BaseService {
   private async computeVirtualForRoute(route: Route) {
     const totalSessions = await this.prisma.session.count({
       where: {
-        routeId: route.id,
+        project: {
+          routeId: route.id,
+        },
       },
     });
+
+    /* Counts all the sessions that are ascents for the given route */
     const totalAscents = await this.prisma.session.count({
       where: {
-        routeId: route.id,
-        ascent: true,
+        project: {
+          routeId: route.id,
+        },
+        has_ascent: true,
       },
     });
 

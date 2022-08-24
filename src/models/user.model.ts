@@ -1,7 +1,7 @@
 import { BaseModel } from './base.model';
 import { Zone } from './zone.model';
 import { Route } from './route.model';
-import { Ascent } from './ascent.model';
+import { Project } from './project.model';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserPreferences } from './user-preferences.model';
 
@@ -33,7 +33,7 @@ export class User extends BaseModel {
   routes: Route[];
  
   @ApiProperty()
-  ascents: Ascent[];
+  projects: Project[];
 
   password: string;
 }

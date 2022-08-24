@@ -13,43 +13,43 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
-import { AscentQueryArgs } from 'src/models/args/ascent-query.args';
-import { Ascent } from 'src/models/ascent.model';
-import { CreateAscentInput } from 'src/models/dto/create_ascent.dto';
-import { UpdateAscentInput } from 'src/models/dto/update_ascent.dto';
-import { AscentService } from 'src/services/ascent.service';
+import { ProjectQueryArgs } from 'src/models/args/ascent-query.args';
+import { Project } from 'src/models/project.model';
+import { CreateProjectInput } from 'src/models/dto/create_ascent.dto';
+import { UpdateProjectInput } from 'src/models/dto/update_ascent.dto';
+import { ProjectService } from 'src/services/project.service';
 
-@Controller('ascents')
-@ApiTags('ascents')
+@Controller('projects')
+@ApiTags('projects')
 @UseGuards(AuthGuard('jwt'))
-export class AscentController {
-  constructor(private readonly service: AscentService) {}
+export class ProjectController {
+  constructor(private readonly service: ProjectService) {}
 
   @Get('')
   @ApiResponse({
-    type: () => Ascent,
+    type: () => Project,
     isArray: true,
     status: 200,
   })
-  async getAscents(@CurrentUser() user: User, @Query() query: AscentQueryArgs) {
+  async getProjects(@CurrentUser() user: User, @Query() query: ProjectQueryArgs) {
     return this.service.getAllForUser(user.id, query);
   }
 
   @Get(':id')
-  @ApiResponse({ status: 200, type: () => Ascent })
+  @ApiResponse({ status: 200, type: () => Project })
   async getSingle(@CurrentUser() user: User, @Param('id') id: string) {
     return this.service.getOne(user.id, id);
   }
 
   @Post('')
-  @ApiResponse({ type: () => Ascent, status: 200 })
-  async add(@CurrentUser() user: User, @Body() data: CreateAscentInput) {
+  @ApiResponse({ type: () => Project, status: 200 })
+  async add(@CurrentUser() user: User, @Body() data: CreateProjectInput) {
     return this.service.create(user.id, data);
   }
 
   @Put(':id')
-  @ApiResponse({ type: () => Ascent, status: 200 })
-  async edit(@Param('id') id: string, @Body() data: UpdateAscentInput) {
+  @ApiResponse({ type: () => Project, status: 200 })
+  async edit(@Param('id') id: string, @Body() data: UpdateProjectInput) {
     return this.service.update(id, data);
   }
 

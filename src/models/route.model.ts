@@ -1,7 +1,7 @@
 import { User } from './user.model';
 import { BaseModel, baseSortParams } from './base.model';
 import { Zone } from './zone.model';
-import { Ascent } from './ascent.model';
+import { Project } from './project.model';
 import { Session } from './session.model';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 
@@ -67,8 +67,8 @@ export class Route extends BaseModel {
   @ApiProperty({ type: () => Zone })
   zone: Zone;
 
-  @ApiProperty({ type: () => Ascent, isArray: true })
-  ascents: Ascent[] = [];
+  @ApiProperty({ type: () => Project, isArray: true })
+  projects: Project[] = [];
 
   @ApiProperty({ type: () => Session, isArray: true })
   sessions: Session[] = [];

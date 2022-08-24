@@ -14,13 +14,13 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { HttpResponse } from 'src/common/responses/http_response';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
-import { AscentQueryArgs } from 'src/models/args/ascent-query.args';
+import { ProjectQueryArgs } from 'src/models/args/ascent-query.args';
 import { RouteQueryArgs } from 'src/models/args/route-query.args';
-import { Ascent } from 'src/models/ascent.model';
+import { Project } from 'src/models/project.model';
 import { Route } from 'src/models/route.model';
 import { CreateRouteInput } from 'src/resolvers/route/dto/create-route.input';
 import { UpdateRouteInput } from 'src/resolvers/route/dto/update-route.input';
-import { AscentService } from 'src/services/ascent.service';
+import { ProjectService } from 'src/services/project.service';
 import { RouteService } from 'src/services/route.service';
 
 @Controller('routes')
@@ -29,13 +29,19 @@ import { RouteService } from 'src/services/route.service';
 export class RoutesController {
   constructor(
     private readonly routeService: RouteService,
-    private readonly ascentService: AscentService
+    private readonly projectService: ProjectService
   ) {}
 
-  @Get('')
+  @Get('me')
   @ApiResponse({ status: 200, type: HttpResponse, isArray: true })
   async getMyRoutes(@CurrentUser() user: User, @Query() query: RouteQueryArgs) {
     return this.routeService.getAllForUser(user.id, query);
+  }
+
+  @Get('')
+  @ApiResponse({ status: 200, type: HttpResponse, isArray: true })
+  async getAll(@CurrentUser() user: User, @Query() query: RouteQueryArgs) {
+    return this.routeService.getAll(user.id, query);
   }
 
   @Get('random')
@@ -50,14 +56,14 @@ export class RoutesController {
     return this.routeService.getOne(user.id, id);
   }
   
-  @Get(':id/ascents')
-  @ApiResponse({ status: 200, type: Ascent, isArray: true })
-  async getAscentsForRoute(
+  @Get(':id/projects')
+  @ApiResponse({ status: 200, type: Project, isArray: true })
+  async grtProjectsForRoute(
     @CurrentUser() user: User,
     @Param('id') routeId: string,
-    @Query() query: AscentQueryArgs
+    @Query() query: ProjectQueryArgs
   ) {
-    return this.ascentService.getAllForUser(user.id, { ...query, routeId });
+    return this.projectService.getAllForUser(user.id, { ...query, routeId });
   }
 
   @Post('')

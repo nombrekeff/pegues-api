@@ -10,9 +10,9 @@ export const ascentSortParams = <const>[
   'ascentAt',
   ...baseSortParams,
 ];
-export type ValidAscentSortParams = typeof ascentSortParams[number];
+export type ValidProjectSortParams = typeof ascentSortParams[number];
 
-export class Ascent extends BaseModel {
+export class Project extends BaseModel {
   @ApiHideProperty()
   author: User;
 

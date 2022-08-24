@@ -4,7 +4,7 @@ import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Grade } from '@prisma/client';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { User } from 'src/models/user.model';
-import { AscentService } from 'src/services/ascent.service';
+import { ProjectService } from 'src/services/project.service';
 import { RouteService } from 'src/services/route.service';
 import { UserService } from 'src/services/user.service';
 
@@ -14,7 +14,7 @@ import { UserService } from 'src/services/user.service';
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private readonly ascentService: AscentService,
+    private readonly projectService: ProjectService,
     private readonly routeService: RouteService
   ) {}
 
@@ -22,7 +22,7 @@ export class UserController {
   @ApiResponse({ type: User })
   async getUser(@CurrentUser() user: User) {
     return this.userService.findUser(user.id).then(async (v) => {
-      const stats = await this.routeService.getMinMaxGradeForUser(user.id);
+      const stats = await this.userService.getMinMaxGrades(user.id);
       return {
         ...v,
         maxGrade: stats.max.grade,
@@ -33,7 +33,7 @@ export class UserController {
 
   @Get('me/min_max_grade')
   @ApiResponse({ type: () => Grade })
-  async getMaxGrade(@CurrentUser() user: User) {
-    return await this.routeService.getMinMaxGradeForUser(user.id);
+  getMaxGrade(@CurrentUser() user: User) {
+    return this.userService.getMinMaxGrades(user.id);
   }
 }

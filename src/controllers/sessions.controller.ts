@@ -14,14 +14,9 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
-import { AscentQueryArgs } from 'src/models/args/ascent-query.args';
 import { SessionQueryArgs } from 'src/models/args/session-query.args';
-import { Ascent } from 'src/models/ascent.model';
-import { CreateAscentInput } from 'src/models/dto/create_ascent.dto';
 import { CreateSessionInput } from 'src/models/dto/create_session.dto';
-import { UpdateAscentInput } from 'src/models/dto/update_ascent.dto';
 import { UpdateSessionInput } from 'src/models/dto/update_session.dto';
-import { AscentService } from 'src/services/ascent.service';
 import { SessionService } from 'src/services/session.service';
 
 @Controller('sessions')
@@ -30,7 +25,7 @@ import { SessionService } from 'src/services/session.service';
 export class SessionsController {
   constructor(private readonly service: SessionService) {}
 
-  @Get('')
+  @Get('me')
   @ApiResponse({
     type: () => Session,
     isArray: true,

@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Zone, Prisma } from '@prisma/client';
+import { Zone, Prisma, Grade } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { searchByQuery } from 'src/common/common_queries';
 import { ErrorCodes } from 'src/common/error_codes';
@@ -37,9 +37,6 @@ export class ZonesService extends BaseService {
           authorId: authorId,
           ...searchByQuery('name', params.search),
         },
-        // include: {
-        //   routes: { include: { ascents: true } },
-        // },
         orderBy: {
           [sortBy]: sortDir,
         },
@@ -49,7 +46,7 @@ export class ZonesService extends BaseService {
       .then((zones) => this.computeVirtualPropertiesForZones(authorId, zones));
   }
 
-  getAll(params: ZoneQueryArgs = {}) {
+  getAll(userId: string, params: ZoneQueryArgs = {}) {
     const { sortBy, sortDir } = SortHelper.safeSortParams(
       params,
       zoneSortParams,
@@ -61,10 +58,11 @@ export class ZonesService extends BaseService {
       .findMany({
         where: {
           ...searchByQuery('name', params.search),
+          public: true,
+          OR: {
+            authorId: userId,
+          },
         },
-        // include: {
-        //   routes: true,
-        // },
         orderBy: {
           [sortBy]: sortDir,
         },
@@ -121,6 +119,7 @@ export class ZonesService extends BaseService {
         },
         data: {
           name: zoneData.name,
+          public: zoneData.public ?? false,
         },
       });
       return zone;
@@ -164,6 +163,26 @@ export class ZonesService extends BaseService {
     }
   }
 
+  async getMinMaxGrades(userId: string, zoneId: string) {
+    return await this.prisma.route
+      .aggregate({
+        where: {
+          zoneId,
+          NOT: { grade: Grade.uknown },
+        },
+        _max: {
+          grade: true,
+        },
+        _min: {
+          grade: true,
+        },
+      })
+      .then((result) => ({
+        max: result._max,
+        min: result._min,
+      }));
+  }
+
   async computeVirtualPropertiesForZones(authorId, zones: Zone[]) {
     const computedZones = [];
 
@@ -179,34 +198,25 @@ export class ZonesService extends BaseService {
       zoneId: zone.id,
     };
 
-    const routes = await this.routeService.getAllForUser(userId, { zoneId: zone.id });
+    const routes = await this.routeService.getAllForUser(userId, {
+      zoneId: zone.id,
+    });
     const totalRoutes = await this.prisma.route.count({ where: whereZoneId });
-    const totalAscents = await this.prisma.ascent.count({
+    const totalAscents = await this.prisma.session.count({
       where: {
-        route: whereZoneId,
+        project: {
+          authorId: userId,
+        },
+        has_ascent: true,
       },
     });
-    const minMax = await this.routeService.getMinMaxGradeForZone(
-      userId,
-      zone.id
-    );
-
-    const projects = [];
-    const ascents = [];
-    for (let route of routes) {
-      if (route.ascents.length > 0) {
-        ascents.push(route);
-      } else {
-        projects.push(route);
-      }
-    }
+    const minMax = await this.getMinMaxGrades(userId, zone.id);
 
     return {
       ...zone,
-      ...minMax,
+      minGrade: minMax.min.grade,
+      maxGrade: minMax.max.grade,
       routes,
-      projects,
-      ascents,
       totalRoutes,
       totalAscents,
     };

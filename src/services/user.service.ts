@@ -3,6 +3,7 @@ import { PasswordService } from './password.service';
 import { ChangePasswordInput } from '../resolvers/user/dto/change-password.input';
 import { UpdateUserInput } from '../resolvers/user/dto/update-user.input';
 import { BaseService } from './base.service';
+import { Grade } from '@prisma/client';
 
 @Injectable()
 export class UserService extends BaseService {
@@ -18,6 +19,7 @@ export class UserService extends BaseService {
           zones: false,
           routes: false,
           preferences: true,
+          projects: true,
         },
       })
       .then(async (user) => {
@@ -27,7 +29,13 @@ export class UserService extends BaseService {
           },
         };
 
-        const ascentCount = await this.prisma.ascent.count(whereAuthorIsUser);
+        const ascentCount = await this.prisma.session.count({
+          where: {
+            authorId: user.id,
+            has_ascent: true,
+          },
+        });
+        const projectCount = await this.prisma.project.count(whereAuthorIsUser);
         const routeCount = await this.prisma.route.count(whereAuthorIsUser);
         const zoneCount = await this.prisma.zone.count(whereAuthorIsUser);
 
@@ -36,6 +44,7 @@ export class UserService extends BaseService {
         return {
           ...user,
           ascentCount,
+          projectCount,
           routeCount,
           zoneCount,
         };
@@ -49,6 +58,30 @@ export class UserService extends BaseService {
         id: userId,
       },
     });
+  }
+
+
+  async getMinMaxGrades(authorId: string) {
+    return await this.prisma.route
+      .aggregate({
+        where: {
+          authorId,
+          projects: {
+            some: { authorId: authorId },
+          },
+          NOT: { grade: Grade.uknown },
+        },
+        _max: {
+          grade: true,
+        },
+        _min: {
+          grade: true,
+        },
+      })
+      .then((result) => ({
+        max: result._max,
+        min: result._min,
+      }));
   }
 
   async changePassword(

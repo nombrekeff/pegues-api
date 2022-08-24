@@ -1,8 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class EditZoneInput {
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty()
   name: string;
+
+
+  @IsBoolean()
+  @IsOptional()
+  @ApiProperty()
+  public: boolean;
 }

@@ -16,10 +16,10 @@ export class UpdateSessionInput {
   @IsOptional()
   @IsDateString()
   @ApiProperty()
-  ascentAt: string;
+  ascent_date: string;
 
   @IsOptional()
   @IsBoolean()
   @ApiProperty()
-  ascent: boolean;
+  has_ascent: boolean;
 }

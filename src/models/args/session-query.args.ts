@@ -12,10 +12,15 @@ export class SessionQueryArgs extends QueryAllArgs<ValidSessionSortParams> {
   @IsString()
   @ApiProperty()
   @IsOptional()
+  projectId?: string;
+
+  @IsString()
+  @ApiProperty()
+  @IsOptional()
   zoneId?: string;
 
   @IsBooleanString()
   @ApiProperty()
   @IsOptional()
-  ascent?: string;
+  has_ascent?: string;
 }

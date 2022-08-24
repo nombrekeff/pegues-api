@@ -22,21 +22,25 @@ model User {
   lastname    String?
   zones       Zone[]   
   routes      Route[]
-  ascents     Ascent[]
+  projects    Project[]
   sessions    Session[]
   roles       Role[]   
   preferences UserPreferences?
 }
 
 model Zone {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  name      String   
-  author    User?    @relation(fields: [authorId], references: [id])
-  authorId  String   
-  routes    Route[]
-  type      String   @default("outdoors")
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  name        String   
+  description String?   
+  type        ZoneType @default(outdoors)
+  public      Boolean  @default(false)
+
+  author      User?    @relation(fields: [authorId], references: [id])
+  authorId    String?   
+
+  routes      Route[]
 
   @@unique([authorId, id])
 }
@@ -47,9 +51,11 @@ model Route {
   updatedAt   DateTime   @updatedAt
   name        String   
   description String?   
+  public      Boolean   @default(false)
   grade       Grade           @default(uknown)
   discipline  RouteDiscipline @default(other)
 
+  projects    Project[]
 
   author      User?     @relation(fields: [authorId], references: [id])
   authorId    String?   
@@ -57,42 +63,46 @@ model Route {
   zone        Zone?     @relation(fields: [zoneId], references: [id])
   zoneId      String?
 
-  ascents     Ascent[]
-  sessions    Session[]
   @@unique([authorId, id])
 }
 
-model Ascent {
+model Project {
   id          String    @id @default(cuid())
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  public      Boolean   @default(false)
 
-  route        Route?   @relation(fields: [routeId], references: [id])
-  routeId      String
+  route       Route?   @relation(fields: [routeId], references: [id])
+  routeId     String?
 
   author      User?     @relation(fields: [authorId], references: [id])
   authorId    String?   
 
-  ascentAt    DateTime?
-  sessions    Int       @default(0)
-  tries       Int       @default(0)
-  @@unique([authorId, id])
+  sessions    Session[]
+
+  @@unique([routeId, id])
 }
 
 model Session {
   id          String    @id @default(cuid())
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  description String?
+  notes       String[]  
+  public      Boolean   @default(false)
 
-  route        Route?   @relation(fields: [routeId], references: [id])
-  routeId      String
+  project     Project?  @relation(fields: [projectId], references: [id])
+  projectId   String?
 
   author      User?     @relation(fields: [authorId], references: [id])
   authorId    String?   
 
-  ascentAt    DateTime?
-  ascent      Boolean   @default(false)
+  ascent_date DateTime?
+  start_date  DateTime?
+  end_date    DateTime?
+  has_ascent  Boolean   @default(false)
   tries       Int       @default(0)
+
   @@unique([authorId, id])
 }
 
@@ -112,11 +122,18 @@ enum Role {
   USER
 }
 
- enum RouteDiscipline {
+enum RouteDiscipline {
   lead
   boulder
   trad
   dws
+  other
+}
+
+enum ZoneType {
+  outdoors
+  indoors
+  ice
   other
 }
 

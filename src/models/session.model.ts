@@ -2,7 +2,7 @@ import { User } from './user.model';
 import { BaseModel, baseSortParams } from './base.model';
 import { Route } from './route.model';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
-import { IsOptional } from 'class-validator';
+import { IsBoolean, IsOptional } from 'class-validator';
 
 export const sessionSortParams = <const>[
   'tries',
@@ -17,14 +17,16 @@ export class Session extends BaseModel {
   author: User;
 
   @ApiProperty({ type: () => Route })
-  route: Route;
+  project: Route;
 
   @ApiProperty()
   @IsOptional()
-  ascentAt?: Date;
+  ascent_date?: Date;
 
   @ApiProperty()
-  sessions: number = 0;
+  @IsOptional()
+  @IsBoolean()
+  has_ascent?: boolean;
 
   @ApiProperty()
   tries: number = 0;
