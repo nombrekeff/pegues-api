@@ -1,7 +1,7 @@
 
 import { ApiProperty } from '@nestjs/swagger';
 import { Grade } from '@prisma/client';
-import { IsOptional, IsString, IsEnum, IsBoolean } from 'class-validator';
+import { IsOptional, IsString, IsEnum, IsBoolean, IsBooleanString } from 'class-validator';
 import { config } from 'src/configs/config';
 import { ValidRouteSortParams } from '../route.model';
 import { QueryAllArgs } from './query-all.args';
@@ -13,10 +13,10 @@ export class RouteQueryArgs extends QueryAllArgs<ValidRouteSortParams> {
   @ApiProperty()
   zoneId?: string;
 
-  @IsBoolean()
+  @IsBooleanString()
   @IsOptional()
   @ApiProperty()
-  hasAscents?: boolean;
+  hasProjects?: string;
 
   @IsEnum(Grade, {
     message: (args) => {

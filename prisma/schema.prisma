@@ -20,12 +20,15 @@ model User {
   password    String   
   firstname   String?
   lastname    String?
-  zones       Zone[]   
-  routes      Route[]
-  projects    Project[]
-  sessions    Session[]
-  roles       Role[]   
-  preferences UserPreferences?
+  username    String?
+
+  profileImage  Media?
+  zones         Zone[]   
+  routes        Route[]
+  projects      Project[]
+  sessions      Session[]
+  roles         Role[]   
+  preferences   UserPreferences?
 }
 
 model Zone {
@@ -55,6 +58,7 @@ model Route {
   grade       Grade           @default(uknown)
   discipline  RouteDiscipline @default(other)
 
+  images      Media[]
   projects    Project[]
 
   author      User?     @relation(fields: [authorId], references: [id])
@@ -106,6 +110,23 @@ model Session {
   @@unique([authorId, id])
 }
 
+model Media {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  mimetype    String
+  filename    String
+  path        String
+  size        Int
+  used        Boolean  @default(false)
+
+  author      User?    @relation(fields: [authorId], references: [id])
+  authorId    String?  @unique 
+
+  route       Route?   @relation(fields: [routeId], references: [id])
+  routeId     String?
+}
+
 model UserPreferences {
   id                  String   @id @default(cuid())
   createdAt           DateTime @default(now())
@@ -113,7 +134,7 @@ model UserPreferences {
   preferredDiscipline RouteDiscipline @default(lead)
 
   author    User?     @relation(fields: [authorId], references: [id])
-  authorId  String?    @unique
+  authorId  String?   @unique
   @@unique([authorId, id])
 }
 

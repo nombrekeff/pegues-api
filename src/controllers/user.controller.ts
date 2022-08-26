@@ -1,8 +1,10 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Grade } from '@prisma/client';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { EditUserInput } from 'src/models/dto/edit_user.dto';
+import { SetProfileImageInput } from 'src/models/dto/set_profile_image.dto';
 import { User } from 'src/models/user.model';
 import { ProjectService } from 'src/services/project.service';
 import { RouteService } from 'src/services/route.service';
@@ -30,6 +32,25 @@ export class UserController {
       };
     });
   }
+
+  @Put('me')
+  @ApiResponse({ type: () => User, status: 200 })
+  editZone(
+    @CurrentUser() user: User,
+    @Body() data: EditUserInput
+  ) {
+    return this.userService.update(user.id, data);
+  }
+
+  @Put('me/profile_image')
+  @ApiResponse({ type: () => User, status: 200 })
+  setProfileImage(
+    @CurrentUser() user: User,
+    @Body() data: SetProfileImageInput
+  ) {
+    return this.userService.setProfileImage(user.id, data);
+  }
+
 
   @Get('me/min_max_grade')
   @ApiResponse({ type: () => Grade })

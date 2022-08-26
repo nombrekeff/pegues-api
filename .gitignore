@@ -8,5 +8,6 @@ ssl/
 
 prisma/migrations/dev/
 .env
+media/
 
 TODO.md

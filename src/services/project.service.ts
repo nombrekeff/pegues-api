@@ -35,7 +35,14 @@ export class ProjectService extends BaseService {
         id: ascentId,
       },
       include: {
-        route: true,
+        route: {
+          include: { zone: true },
+        },
+        sessions: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
       },
     });
   }
@@ -44,7 +51,7 @@ export class ProjectService extends BaseService {
     return this._getAllWhere({ route: { zone: { id: zoneId } } }, params);
   }
 
-  private async _getAllWhere(where: any, params: ProjectQueryArgs = {}) {
+  private _getAllWhere(where: any, params: ProjectQueryArgs = {}) {
     const { sortBy, sortDir } = SortHelper.safeSortParams(
       params,
       ascentSortParams
@@ -68,10 +75,11 @@ export class ProjectService extends BaseService {
           {
             ...where,
             route: {
-              ...searchByQuery('name', params.search),
+              ...searchByQuery('name', params.search, 'insensitive'),
             },
           },
           {
+            ...where,
             route: {
               zone: {
                 ...searchByQuery('name', params.search),
@@ -84,7 +92,11 @@ export class ProjectService extends BaseService {
         route: {
           include: { zone: true },
         },
-        sessions: true,
+        sessions: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
       },
       orderBy: {
         [sortBy]: sortDir,
@@ -182,23 +194,38 @@ export class ProjectService extends BaseService {
     return computedProjects;
   }
 
-  private async computeVirtualForProject(authorId: string, project: Project) {
+  private async computeVirtualForProject(authorId: string, project: any) {
+    const whereUserAndProj = {
+      project: { authorId, id: project.id },
+    };
+
     const totalSessions = await this.prisma.session.count({
-      where: {
-        project: { authorId },
-      },
+      where: whereUserAndProj,
     });
     const totalAscents = await this.prisma.session.count({
       where: {
-        project: { authorId },
+        ...whereUserAndProj,
         has_ascent: true,
       },
     });
+    const totalTries = await this.prisma.session.count({
+      select: { tries: true },
+      where: {
+        ...whereUserAndProj,
+      },
+    });
+
+    console.log(project);
 
     return {
       ...project,
+      sessions: (project.sessions ?? []).map((e) => ({
+        ...e,
+        route: project.route,
+      })),
       totalSessions,
       totalAscents,
+      totalTries: totalTries.tries,
     };
   }
 }

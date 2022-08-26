@@ -1,12 +1,20 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PasswordService } from './password.service';
 import { ChangePasswordInput } from '../resolvers/user/dto/change-password.input';
-import { UpdateUserInput } from '../resolvers/user/dto/update-user.input';
 import { BaseService } from './base.service';
-import { Grade } from '@prisma/client';
+import { Grade, User } from '@prisma/client';
+import { EditUserInput } from 'src/models/dto/edit_user.dto';
+import { SetProfileImageInput } from 'src/models/dto/set_profile_image.dto';
 
 @Injectable()
 export class UserService extends BaseService {
+  private defaultInclude = {
+    zones: false,
+    routes: false,
+    projects: false,
+    preferences: true,
+    profileImage: { select: { path: true, filename: true } },
+  };
   constructor(private passwordService: PasswordService) {
     super();
   }
@@ -15,51 +23,64 @@ export class UserService extends BaseService {
     return this.prisma.user
       .findUnique({
         where: { id: userId },
-        include: {
-          zones: false,
-          routes: false,
-          preferences: true,
-          projects: true,
-        },
+        include: this.defaultInclude,
       })
-      .then(async (user) => {
-        const whereAuthorIsUser = {
-          where: {
-            authorId: user.id,
-          },
-        };
-
-        const ascentCount = await this.prisma.session.count({
-          where: {
-            authorId: user.id,
-            has_ascent: true,
-          },
-        });
-        const projectCount = await this.prisma.project.count(whereAuthorIsUser);
-        const routeCount = await this.prisma.route.count(whereAuthorIsUser);
-        const zoneCount = await this.prisma.zone.count(whereAuthorIsUser);
-
-        delete user.password;
-
-        return {
-          ...user,
-          ascentCount,
-          projectCount,
-          routeCount,
-          zoneCount,
-        };
-      });
+      .then(this.computeVirtualForZone.bind(this));
   }
 
-  updateUser(userId: string, newUserData: UpdateUserInput) {
-    return this.prisma.user.update({
-      data: newUserData,
+  update(userId: string, newUserData: EditUserInput) {
+    return this.prisma.user
+      .update({
+        data: newUserData,
+        where: { id: userId },
+        include: this.defaultInclude,
+      })
+      .then(this.computeVirtualForZone.bind(this));
+  }
+
+  setProfileImage(userId: string, data: SetProfileImageInput) {
+    return this.prisma.user
+      .update({
+        data: {
+          profileImage: {
+            connect: {
+              id: data.mediaId,
+            },
+          },
+        },
+        where: { id: userId },
+        include: this.defaultInclude,
+      })
+      .then(this.computeVirtualForZone.bind(this));
+  }
+
+  async computeVirtualForZone(user: User) {
+    const whereAuthorIsUser = {
       where: {
-        id: userId,
+        authorId: user.id,
+      },
+    };
+
+    const ascentCount = await this.prisma.session.count({
+      where: {
+        authorId: user.id,
+        has_ascent: true,
       },
     });
-  }
+    const projectCount = await this.prisma.project.count(whereAuthorIsUser);
+    const routeCount = await this.prisma.route.count(whereAuthorIsUser);
+    const zoneCount = await this.prisma.zone.count(whereAuthorIsUser);
 
+    delete user.password;
+
+    return {
+      ...user,
+      ascentCount,
+      projectCount,
+      routeCount,
+      zoneCount,
+    };
+  }
 
   async getMinMaxGrades(authorId: string) {
     return await this.prisma.route

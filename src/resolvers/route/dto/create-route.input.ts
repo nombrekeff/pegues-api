@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Grade, RouteDiscipline } from '@prisma/client';
-import { IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { config } from 'src/configs/config';
 
 export class CreateRouteInput {
@@ -8,9 +14,17 @@ export class CreateRouteInput {
   @ApiProperty()
   name: string;
 
+  @IsString()
   @ApiProperty()
-  description: string;
+  @IsOptional()
+  description?: string;
 
+  @IsBoolean()
+  @ApiProperty()
+  @IsOptional()
+  public?: boolean;
+
+  @IsString()
   @ApiProperty()
   zoneId: string;
 
@@ -22,7 +36,6 @@ export class CreateRouteInput {
   @IsOptional()
   @ApiProperty({ enum: Grade, default: Grade.uknown })
   grade?: Grade | null;
-
 
   @IsEnum(RouteDiscipline, {
     message: (args) => {

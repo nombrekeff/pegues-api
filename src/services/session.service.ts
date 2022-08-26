@@ -146,6 +146,7 @@ export class SessionService extends BaseService {
           ascent_date: data.ascent_date,
           tries: data.tries,
           has_ascent: data.has_ascent,
+          description: data.description,
         },
       });
       return route;

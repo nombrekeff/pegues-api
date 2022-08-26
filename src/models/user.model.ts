@@ -4,6 +4,7 @@ import { Route } from './route.model';
 import { Project } from './project.model';
 import { ApiProperty } from '@nestjs/swagger';
 import { UserPreferences } from './user-preferences.model';
+import { Media } from '@prisma/client';
 
 export enum Role {
   ADMIN = 'ADMIN',
@@ -16,7 +17,13 @@ export class User extends BaseModel {
   
   @ApiProperty()
   firstname?: string;
- 
+
+  @ApiProperty()
+  username?: string;
+
+  @ApiProperty()
+  profileImage?: Media;
+
   @ApiProperty()
   lastname?: string;
  

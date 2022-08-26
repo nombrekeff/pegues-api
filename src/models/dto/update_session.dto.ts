@@ -5,6 +5,7 @@ import {
   IsNotEmpty,
   IsNumber,
   IsOptional,
+  IsString,
 } from 'class-validator';
 
 export class UpdateSessionInput {
@@ -12,6 +13,11 @@ export class UpdateSessionInput {
   @IsNumber()
   @ApiProperty()
   tries: number;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty()
+  description: string;
 
   @IsOptional()
   @IsDateString()

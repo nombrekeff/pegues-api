@@ -10,6 +10,8 @@ Table User {
   password String [not null]
   firstname String
   lastname String
+  username String
+  profileImage Media
   zones Zone [not null]
   routes Route [not null]
   projects Project [not null]
@@ -44,6 +46,7 @@ Table Route {
   public Boolean [not null, default: false]
   grade Grade [not null, default: 'uknown']
   discipline RouteDiscipline [not null, default: 'other']
+  images Media [not null]
   projects Project [not null]
   author User
   authorId String
@@ -91,6 +94,21 @@ Table Session {
   indexes {
     (authorId, id) [unique]
   }
+}
+
+Table Media {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  mimetype String [not null]
+  filename String [not null]
+  path String [not null]
+  size Int [not null]
+  used Boolean [not null, default: false]
+  author User
+  authorId String [unique]
+  route Route
+  routeId String
 }
 
 Table UserPreferences {
@@ -166,5 +184,9 @@ Ref: Project.authorId > User.id
 Ref: Session.projectId > Project.id
 
 Ref: Session.authorId > User.id
+
+Ref: Media.authorId - User.id
+
+Ref: Media.routeId > Route.id
 
 Ref: UserPreferences.authorId - User.id

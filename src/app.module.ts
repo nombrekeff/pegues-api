@@ -22,6 +22,9 @@ import { SessionsController } from './controllers/sessions.controller';
 import { SystemController } from './controllers/system.controller';
 import { SystemService } from './services/system.service';
 import { SystemModule } from './resolvers/system.module';
+import { MediaController } from './controllers/media.controller';
+import { MulterModule } from '@nestjs/platform-express';
+import { MediaModule } from './resolvers/media.module';
 
 @Module({
   imports: [
@@ -34,6 +37,10 @@ import { SystemModule } from './resolvers/system.module';
     SessionModule,
     UserPreferencesModule,
     SystemModule,
+    MediaModule,
+    MulterModule.register({
+      dest: './media/upload',
+    })
   ],
   controllers: [
     AuthController,
@@ -44,6 +51,7 @@ import { SystemModule } from './resolvers/system.module';
     SessionsController,
     UserPreferencesController,
     SystemController,
+    MediaController,
   ],
   providers: [
     {

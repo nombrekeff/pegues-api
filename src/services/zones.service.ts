@@ -58,10 +58,12 @@ export class ZonesService extends BaseService {
       .findMany({
         where: {
           ...searchByQuery('name', params.search),
-          public: true,
-          OR: {
-            authorId: userId,
-          },
+          OR: [
+            { public: true },
+            {
+              authorId: userId,
+            },
+          ],
         },
         orderBy: {
           [sortBy]: sortDir,
@@ -69,7 +71,7 @@ export class ZonesService extends BaseService {
         skip: Number(params.skip ?? 0),
         take: Number(params.take) || this.defaults.defaultPaginationTake,
       })
-      .then((zones) => this.computeVirtualPropertiesForZones(null, zones));
+      .then((zones) => this.computeVirtualPropertiesForZones(userId, zones));
   }
 
   getOne(authorId: string, id: string) {
@@ -120,6 +122,7 @@ export class ZonesService extends BaseService {
         data: {
           name: zoneData.name,
           public: zoneData.public ?? false,
+          description: zoneData.description,
         },
       });
       return zone;
@@ -219,6 +222,7 @@ export class ZonesService extends BaseService {
       routes,
       totalRoutes,
       totalAscents,
+      yours: userId === zone.authorId,
     };
   }
 }

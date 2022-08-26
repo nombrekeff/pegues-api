@@ -16,7 +16,7 @@ import { BaseService } from './base.service';
 
 @Injectable()
 export class RouteService extends BaseService {
-  async getAllForUser(userId: string, params: RouteQueryArgs = {}) {
+  getAllForUser(userId: string, params: RouteQueryArgs = {}) {
     const { sortBy, sortDir } = SortHelper.safeSortParams(
       params,
       routeSortParams,
@@ -24,29 +24,39 @@ export class RouteService extends BaseService {
       this.defaults.sortDir
     );
 
-    return await this.prisma.route
+    let projectsWhere = {};
+    // List routes that have projects
+    if (params.hasProjects == 'true') {
+      projectsWhere = {
+        some: {},
+      };
+    }
+
+    // List routes that have no projects
+    if (params.hasProjects == 'false') {
+      projectsWhere = {
+        none: {},
+      };
+    }
+
+    return this.prisma.route
       .findMany({
         where: {
-          AND: {
-            authorId: userId,
-            ...(params.zoneId
-              ? {
-                  zoneId: params.zoneId,
-                }
-              : {}),
-            ...(params.grade
-              ? {
-                  grade: params.grade,
-                }
-              : {}),
-          },
+          authorId: userId,
+          ...(params.zoneId
+            ? {
+                zoneId: params.zoneId,
+              }
+            : {}),
+          ...(params.grade
+            ? {
+                grade: params.grade,
+              }
+            : {}),
+          projects: projectsWhere,
           OR: [
-            searchByQuery('name', params.search),
-            {
-              zone: {
-                ...searchByQuery('name', params.search),
-              },
-            },
+            { name: { contains: params.search } },
+            { zone: { name: { contains: params.search } } },
           ],
         },
         include: {
@@ -59,7 +69,7 @@ export class RouteService extends BaseService {
         skip: Number(params.skip ?? 0),
         take: Number(params.take) || this.defaults.defaultPaginationTake,
       })
-      .then(this.computeVirtualProperties.bind(this));
+      .then(this.computeVirtualProperties.bind(this, userId));
   }
 
   async getRandomRoute(userId: string, params: RouteQueryArgs = {}) {
@@ -102,22 +112,22 @@ export class RouteService extends BaseService {
     return HttpResponse.ok(null, 'No route found');
   }
 
-  async getAll(userId: string, params: RouteQueryArgs = {}) {
+  getAll(userId: string, params: RouteQueryArgs = {}) {
     const { sortBy, sortDir } = SortHelper.safeSortParams(
       params,
-      routeSortParams
+      routeSortParams,
+      this.defaults.sortBy,
+      this.defaults.sortDir
     );
 
-    return await this.prisma.route
+    return this.prisma.route
       .findMany({
         where: {
-          AND: {
-            ...(params.zoneId
-              ? {
-                  zoneId: params.zoneId,
-                }
-              : {}),
-          },
+          ...(params.zoneId
+            ? {
+                zoneId: params.zoneId,
+              }
+            : {}),
           OR: [
             searchByQuery('name', params.search),
             {
@@ -139,7 +149,7 @@ export class RouteService extends BaseService {
           Number(params.take) ||
           this.config.get<DefaultsConfig>('defaults').defaultPaginationTake,
       })
-      .then(this.computeVirtualProperties.bind(this));
+      .then(this.computeVirtualProperties.bind(this, userId));
   }
 
   async getOne(authorId: string, routeId: string): Promise<Route> {
@@ -154,7 +164,7 @@ export class RouteService extends BaseService {
           projects: true,
         },
       })
-      .then(this.computeVirtualForRoute.bind(this));
+      .then(this.computeVirtualForRoute.bind(this, authorId));
   }
 
   async createRoute(userId: string, routeData: CreateRouteInput) {
@@ -168,6 +178,7 @@ export class RouteService extends BaseService {
           grade: routeData.grade,
           description: routeData.description,
           discipline: routeData.discipline,
+          public: routeData.public ?? false,
           // TODO: create ascent if passed in
         },
       });
@@ -239,17 +250,17 @@ export class RouteService extends BaseService {
     }
   }
 
-  private async computeVirtualProperties(routes: Route[]) {
+  private async computeVirtualProperties(userId, routes: Route[]) {
     const withCount = [];
 
     for (const route of routes) {
-      withCount.push(await this.computeVirtualForRoute(route));
+      withCount.push(await this.computeVirtualForRoute(userId, route));
     }
 
     return withCount;
   }
 
-  private async computeVirtualForRoute(route: Route) {
+  private async computeVirtualForRoute(userId, route: Route) {
     const totalSessions = await this.prisma.session.count({
       where: {
         project: {
@@ -273,6 +284,7 @@ export class RouteService extends BaseService {
       totalAscents,
       totalSessions,
       hasAscents: totalAscents > 0,
+      yours: userId === route.authorId,
     };
   }
 }
