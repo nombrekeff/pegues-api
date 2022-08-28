@@ -12,7 +12,6 @@ export class EditZoneInput {
   @ApiProperty()
   description: string;
 
-
   @IsBoolean()
   @IsOptional()
   @ApiProperty()

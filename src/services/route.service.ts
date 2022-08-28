@@ -9,7 +9,10 @@ import { CreateRouteInput } from 'src/resolvers/route/dto/create-route.input';
 import { UpdateRouteInput } from 'src/resolvers/route/dto/update-route.input';
 import { searchByQuery } from 'src/common/common_queries';
 import { RouteQueryArgs } from 'src/models/args/route-query.args';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import {
+  PrismaClientKnownRequestError,
+  PrismaClientValidationError,
+} from '@prisma/client/runtime';
 import { DefaultsConfig } from 'src/configs/config.interface';
 import { HttpResponse } from 'src/common/responses/http_response';
 import { BaseService } from './base.service';
@@ -169,19 +172,21 @@ export class RouteService extends BaseService {
 
   async createRoute(userId: string, routeData: CreateRouteInput) {
     try {
-      const route = await this.prisma.route.create({
-        data: {
-          //  Spread out like this to avoid errors if invalid arguments are passed in
-          authorId: userId,
-          zoneId: routeData.zoneId,
-          name: routeData.name,
-          grade: routeData.grade,
-          description: routeData.description,
-          discipline: routeData.discipline,
-          public: routeData.public ?? false,
-          // TODO: create ascent if passed in
-        },
-      });
+      const route = await this.prisma.route
+        .create({
+          data: {
+            //  Spread out like this to avoid errors if invalid arguments are passed in
+            authorId: userId,
+            zoneId: routeData.zoneId,
+            name: routeData.name,
+            grade: routeData.grade,
+            description: routeData.description,
+            discipline: routeData.discipline,
+            public: routeData.public ?? false,
+            // TODO: create ascent if passed in
+          },
+        })
+        .then(this.computeVirtualForRoute.bind(this, userId));
       return route;
     } catch (e) {
       if (
@@ -192,26 +197,32 @@ export class RouteService extends BaseService {
           `Zone '${routeData.zoneId}' not found.`,
           HttpStatus.BAD_REQUEST
         );
-      } else {
-        throw new Error(e);
       }
+
+      if (e instanceof PrismaClientValidationError) {
+        throw new HttpException('Invalid request', HttpStatus.BAD_REQUEST);
+      }
+
+      throw new Error(e);
     }
   }
 
   async updateRoute(userId: string, id: string, routeData: UpdateRouteInput) {
     try {
-      const route = await this.prisma.route.update({
-        where: {
-          authorId_id: { id: id, authorId: userId },
-        },
-        data: {
-          name: routeData.name,
-          grade: routeData.grade as any,
-          description: routeData.description,
-          zoneId: routeData.zoneId,
-        },
-      });
-      return route;
+      return this.prisma.route
+        .update({
+          where: {
+            authorId_id: { id: id, authorId: userId },
+          },
+          data: {
+            name: routeData.name,
+            grade: routeData.grade as any,
+            description: routeData.description,
+            zoneId: routeData.zoneId,
+          },
+          include: { projects: true, zone: true },
+        })
+        .then(this.computeVirtualForRoute.bind(this, userId));
     } catch (e) {
       if (
         e instanceof PrismaClientKnownRequestError &&

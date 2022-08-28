@@ -2,7 +2,10 @@ import { HttpStatus } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 import { HttpException } from '@nestjs/common/exceptions';
 import { Project, Prisma, Grade } from '@prisma/client';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import {
+  PrismaClientKnownRequestError,
+  PrismaClientValidationError,
+} from '@prisma/client/runtime';
 import { searchByQuery } from 'src/common/common_queries';
 import { ErrorCodes } from 'src/common/error_codes';
 import { SortHelper } from 'src/common/sort_helper';
@@ -178,6 +181,11 @@ export class ProjectService extends BaseService {
           HttpStatus.NOT_FOUND
         );
       }
+
+      if (e instanceof PrismaClientValidationError) {
+        throw new HttpException('Invalid request', HttpStatus.BAD_REQUEST);
+      }
+
       throw e;
     }
   }
@@ -199,23 +207,16 @@ export class ProjectService extends BaseService {
       project: { authorId, id: project.id },
     };
 
-    const totalSessions = await this.prisma.session.count({
+    const sessions = await this.prisma.session.findMany({
       where: whereUserAndProj,
     });
-    const totalAscents = await this.prisma.session.count({
-      where: {
-        ...whereUserAndProj,
-        has_ascent: true,
-      },
-    });
-    const totalTries = await this.prisma.session.count({
-      select: { tries: true },
-      where: {
-        ...whereUserAndProj,
-      },
-    });
 
-    console.log(project);
+    let totalAscents = 0;
+    let totalTries = 0;
+    for (let session of sessions) {
+      if (session.has_ascent) totalAscents += 1;
+      totalTries += session.tries;
+    }
 
     return {
       ...project,
@@ -223,9 +224,9 @@ export class ProjectService extends BaseService {
         ...e,
         route: project.route,
       })),
-      totalSessions,
+      totalSessions: sessions.length,
       totalAscents,
-      totalTries: totalTries.tries,
+      totalTries: totalTries,
     };
   }
 }

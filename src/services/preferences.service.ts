@@ -1,7 +1,15 @@
 import { CreateUserPreferenceInput } from './../models/dto/create_user_pref.dto';
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { BaseService } from './base.service';
+import { UpdateUserPreferenceInput } from 'src/models/dto/update_user_pref.dto';
+import { PrismaClientKnownRequestError, PrismaClientValidationError } from '@prisma/client/runtime';
+import { ErrorCodes } from 'src/common/error_codes';
 
 @Injectable()
 export class UserPreferencesService extends BaseService {
@@ -32,5 +40,32 @@ export class UserPreferencesService extends BaseService {
     }
   }
 
-  update(prefId: string, data) {}
+  async update(prefId: string, data: UpdateUserPreferenceInput) {
+    try {
+      const prefs = await this.prisma.userPreferences.update({
+        data: data,
+        where: {
+          id: prefId,
+        },
+      });
+      return prefs;
+    } catch (e) {
+      console.log('err',e);
+      if (
+        e instanceof PrismaClientKnownRequestError &&
+        e.code == ErrorCodes.targetNotFound
+      ) {
+        throw new HttpException(
+          `Preference "${prefId}" not found`,
+          HttpStatus.NOT_FOUND
+        );
+      }
+
+      if (e instanceof PrismaClientValidationError) {
+        throw new HttpException('Invalid request', HttpStatus.BAD_REQUEST);
+      }
+
+      throw e;
+    }
+  }
 }

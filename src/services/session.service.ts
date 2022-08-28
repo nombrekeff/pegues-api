@@ -111,13 +111,12 @@ export class SessionService extends BaseService {
           authorId: userId,
           projectId: data.projectId,
           // Only set [ascentAt] if ascent is true
-          ascent_date: data.has_ascent
-            ? data.ascent_date
-              ? new Date(data.ascent_date)
-              : new Date(Date.now())
-            : null,
+          ascent_date: data.ascent_date
+            ? new Date(data.ascent_date)
+            : new Date(Date.now()),
           has_ascent: data.has_ascent,
           tries: data.tries,
+          description: data.description,
         },
       });
       return session;
@@ -143,7 +142,9 @@ export class SessionService extends BaseService {
           id: id,
         },
         data: {
-          ascent_date: data.ascent_date,
+          ascent_date: data.ascent_date
+            ? new Date(data.ascent_date)
+            : new Date(Date.now()),
           tries: data.tries,
           has_ascent: data.has_ascent,
           description: data.description,

@@ -11,6 +11,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { CreateUserPreferenceInput } from 'src/models/dto/create_user_pref.dto';
+import { UpdateUserPreferenceInput } from 'src/models/dto/update_user_pref.dto';
 import { UserPreferences } from 'src/models/user-preferences.model';
 import { User } from 'src/models/user.model';
 import { UserPreferencesService } from 'src/services/preferences.service';
@@ -35,7 +36,7 @@ export class UserPreferencesController {
 
   @Put(':id')
   @ApiResponse({ type: UserPreferences })
-  async updateUserPreferences(@Param('id') id: string, @Body() body: any) {
+  async updateUserPreferences(@Param('id') id: string, @Body() body: UpdateUserPreferenceInput) {
     return this.prefService.update(id, body);
   }
 }

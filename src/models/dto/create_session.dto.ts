@@ -5,12 +5,18 @@ import {
   IsNotEmpty,
   IsNumber,
   IsOptional,
+  IsString,
 } from 'class-validator';
 
 export class CreateSessionInput {
   @IsNotEmpty()
   @ApiProperty()
   projectId: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  description: string;
 
   @IsOptional()
   @IsNumber()

@@ -97,6 +97,7 @@ export class ZonesService extends BaseService {
       const zone = await this.prisma.zone.create({
         data: {
           name: zoneData.name,
+          public: zoneData.public ?? false,
           authorId: userId,
         },
       });
