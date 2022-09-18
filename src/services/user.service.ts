@@ -88,7 +88,10 @@ export class UserService extends BaseService {
         where: {
           authorId,
           projects: {
-            some: { authorId: authorId },
+            some: {
+              authorId: authorId,
+              sessions: { some: { has_ascent: true } },
+            },
           },
           NOT: { grade: Grade.uknown },
         },

@@ -40,6 +40,7 @@
     "docker:build": "docker-compose build"
   },
   "dependencies": {
+    "@nestjs-modules/mailer": "^1.8.1",
     "@nestjs/common": "8.0.6",
     "@nestjs/config": "1.0.1",
     "@nestjs/core": "8.0.6",
@@ -52,8 +53,10 @@
     "bcrypt": "5.0.1",
     "class-transformer": "0.4.0",
     "class-validator": "0.13.1",
+    "nodemailer": "^6.7.8",
     "passport": "0.4.1",
     "passport-jwt": "4.0.0",
+    "pug": "^3.0.2",
     "reflect-metadata": "0.1.13",
     "rimraf": "3.0.2",
     "rxjs": "^7.5.6",

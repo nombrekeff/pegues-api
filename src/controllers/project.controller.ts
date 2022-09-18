@@ -54,7 +54,7 @@ export class ProjectController {
   }
 
   @Delete(':id')
-  async deleteZone(@CurrentUser() user: User, @Param('id') id: string) {
+  async delete(@CurrentUser() user: User, @Param('id') id: string) {
     return this.service.remove(user.id, id);
   }
 }

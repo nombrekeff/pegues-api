@@ -42,6 +42,7 @@ export class ZonesService extends BaseService {
         },
         skip: Number(params.skip ?? 0),
         take: Number(params.take) || this.defaults.defaultPaginationTake,
+        include: { routes: true },
       })
       .then((zones) => this.computeVirtualPropertiesForZones(authorId, zones));
   }
@@ -70,6 +71,7 @@ export class ZonesService extends BaseService {
         },
         skip: Number(params.skip ?? 0),
         take: Number(params.take) || this.defaults.defaultPaginationTake,
+        include: { routes: true },
       })
       .then((zones) => this.computeVirtualPropertiesForZones(userId, zones));
   }
@@ -81,13 +83,7 @@ export class ZonesService extends BaseService {
           id,
           authorId,
         },
-        // include: {
-        //   routes: {
-        //     include: {
-        //       ascents: true,
-        //     },
-        //   },
-        // },
+        include: { routes: true },
       })
       .then((zone) => this.computeVirtualForZone(authorId, zone));
   }

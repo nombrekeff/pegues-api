@@ -11,9 +11,14 @@ import { ascentSortParams } from 'src/models/project.model';
 import { CreateSessionInput } from 'src/models/dto/create_session.dto';
 import { UpdateSessionInput } from 'src/models/dto/update_session.dto';
 import { BaseService } from './base.service';
+import { ProjectService } from './project.service';
 
 @Injectable()
 export class SessionService extends BaseService {
+  constructor(private readonly projectService: ProjectService) {
+    super();
+  }
+
   async getAllForUser(authorId: string, params: SessionQueryArgs = {}) {
     return this.prisma.session.findMany({
       where: {
@@ -119,6 +124,7 @@ export class SessionService extends BaseService {
           description: data.description,
         },
       });
+      await this.projectService.updateDate(data.projectId);
       return session;
     } catch (e) {
       if (
@@ -137,22 +143,26 @@ export class SessionService extends BaseService {
 
   async update(id: string, data: UpdateSessionInput) {
     try {
+      const dataToEdit = {
+        tries: data.tries,
+        has_ascent: data.has_ascent,
+        description: data.description,
+      };
+
+      if (data.ascent_date) {
+        dataToEdit['ascent_date'] = new Date(data.ascent_date);
+      }
+
       const route = await this.prisma.session.update({
         where: {
           id: id,
         },
-        data: {
-          ascent_date: data.ascent_date
-            ? new Date(data.ascent_date)
-            : new Date(Date.now()),
-          tries: data.tries,
-          has_ascent: data.has_ascent,
-          description: data.description,
-        },
+        data: dataToEdit,
       });
+      await this.projectService.updateDate(route.projectId);
       return route;
     } catch (e) {
-      throw new Error(e);
+      throw e;
     }
   }
 

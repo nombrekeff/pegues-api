@@ -6,7 +6,7 @@ export class SortHelper {
   static safeSortParams<T extends string>(
     params: any,
     validParams: any,
-    defaultSortBy = 'createdAt',
+    defaultSortBy = 'updatedAt',
     defaultSortDir = 'asc'
   ): SortArgs<T> {
     let { sortBy, sortDir }: any = {

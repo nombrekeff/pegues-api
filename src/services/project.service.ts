@@ -97,7 +97,7 @@ export class ProjectService extends BaseService {
         },
         sessions: {
           orderBy: {
-            createdAt: 'desc',
+            updatedAt: 'desc',
           },
         },
       },
@@ -161,8 +161,26 @@ export class ProjectService extends BaseService {
     }
   }
 
+  async updateDate(id: string) {
+    try {
+      return this.prisma.project.update({
+        where: { id: id },
+        data: {
+          updatedAt: new Date(),
+        },
+      });
+    } catch (e) {
+      throw e;
+    }
+  }
+
   async remove(authorId: string, id: string) {
     try {
+      await this.prisma.session.deleteMany({
+        where: {
+          projectId: id,
+        },
+      });
       const ascent = await this.prisma.project.delete({
         where: {
           id: id,

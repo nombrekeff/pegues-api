@@ -219,6 +219,7 @@ export class RouteService extends BaseService {
             grade: routeData.grade as any,
             description: routeData.description,
             zoneId: routeData.zoneId,
+            public: routeData.public,
           },
           include: { projects: true, zone: true },
         })

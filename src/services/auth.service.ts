@@ -13,11 +13,12 @@ import { Token } from '../models/token.model';
 import { UserPreferences } from 'src/models/user-preferences.model';
 import { BaseService } from './base.service';
 
+
 @Injectable()
 export class AuthService extends BaseService {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly passwordService: PasswordService
+    private readonly passwordService: PasswordService,
   ) {
     super();
   }
