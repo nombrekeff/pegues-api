@@ -9,9 +9,13 @@ import {
 } from 'class-validator';
 
 export class CreateSessionInput {
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty()
   projectId: string;
+
+  @IsOptional()
+  @ApiProperty()
+  routeId: string;
 
   @IsString()
   @IsOptional()

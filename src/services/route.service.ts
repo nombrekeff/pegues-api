@@ -65,6 +65,7 @@ export class RouteService extends BaseService {
         include: {
           zone: true,
           projects: true,
+          images: true,
         },
         orderBy: {
           [sortBy]: sortDir,
@@ -103,6 +104,7 @@ export class RouteService extends BaseService {
       include: {
         zone: true,
         projects: true,
+        images: true,
       },
     });
 
@@ -123,6 +125,21 @@ export class RouteService extends BaseService {
       this.defaults.sortDir
     );
 
+    let projectsWhere = {};
+    // List routes that have projects
+    if (params.hasProjects == 'true') {
+      projectsWhere = {
+        some: {},
+      };
+    }
+
+    // List routes that have no projects
+    if (params.hasProjects == 'false') {
+      projectsWhere = {
+        none: {},
+      };
+    }
+
     return this.prisma.route
       .findMany({
         where: {
@@ -131,18 +148,23 @@ export class RouteService extends BaseService {
                 zoneId: params.zoneId,
               }
             : {}),
-          OR: [
-            searchByQuery('name', params.search),
-            {
-              zone: {
-                ...searchByQuery('name', params.search),
-              },
-            },
-          ],
+          ...(params.grade
+            ? {
+                grade: params.grade,
+              }
+            : {}),
+          projects: projectsWhere,
+          OR: [{ public: true }, { authorId: userId }],
+          // TODO: Fix searching
+          name: { contains: params.search ?? '', mode: 'insensitive' },
+          zone: {
+            name: { contains: params.search ?? '', mode: 'insensitive' },
+          },
         },
         include: {
           zone: true,
           projects: true,
+          images: true,
         },
         orderBy: {
           [sortBy]: sortDir,
@@ -165,6 +187,7 @@ export class RouteService extends BaseService {
         include: {
           zone: true,
           projects: true,
+          images: true,
         },
       })
       .then(this.computeVirtualForRoute.bind(this, authorId));
@@ -282,6 +305,15 @@ export class RouteService extends BaseService {
     });
 
     /* Counts all the sessions that are ascents for the given route */
+    const inNotebook =
+      (await this.prisma.project.count({
+        where: {
+          routeId: route.id,
+          authorId: userId,
+        },
+      })) > 0;
+
+    /* Counts all the sessions that are ascents for the given route */
     const totalAscents = await this.prisma.session.count({
       where: {
         project: {
@@ -297,6 +329,7 @@ export class RouteService extends BaseService {
       totalSessions,
       hasAscents: totalAscents > 0,
       yours: userId === route.authorId,
+      inNotebook,
     };
   }
 }

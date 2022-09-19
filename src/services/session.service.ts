@@ -23,10 +23,12 @@ export class SessionService extends BaseService {
     return this.prisma.session.findMany({
       where: {
         authorId,
-        ...{
-          ...params,
-          has_ascent: params.has_ascent == 'true',
-        },
+        ...(params.has_ascent != null
+          ? { has_ascent: params.has_ascent == 'true' }
+          : {}),
+        ...(params.routeId != null
+          ? { project: { routeId: params.routeId } }
+          : {}),
       },
     });
   }
@@ -66,7 +68,9 @@ export class SessionService extends BaseService {
         AND: {
           ...(params.routeId
             ? {
-                routeId: params.routeId,
+                project: {
+                  routeId: params.routeId,
+                },
               }
             : {}),
           ...(params.zoneId
@@ -110,6 +114,27 @@ export class SessionService extends BaseService {
   }
 
   async create(userId: string, data: CreateSessionInput) {
+    if (!data.projectId && !data.routeId) {
+      throw new HttpException(
+        `routeId or projectId must be passed`,
+        HttpStatus.BAD_REQUEST
+      );
+    }
+
+    // IF a routeId is passed, we ensure that a project exists for that route
+    if (data.routeId) {
+      const proj = await this.prisma.project.findFirst({
+        where: { routeId: data.routeId, authorId: userId },
+      });
+      
+      if (!proj) {
+        const createdProj = await this.projectService.create(userId, data);
+        data.projectId = createdProj.id;
+      } else {
+        data.projectId = proj.id;
+      }
+    }
+
     try {
       const session = await this.prisma.session.create({
         data: {

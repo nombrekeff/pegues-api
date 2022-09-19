@@ -7,9 +7,12 @@ import {
   Post,
   Put,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
 import { HttpResponse } from 'src/common/responses/http_response';
@@ -20,6 +23,7 @@ import { Project } from 'src/models/project.model';
 import { Route } from 'src/models/route.model';
 import { CreateRouteInput } from 'src/resolvers/route/dto/create-route.input';
 import { UpdateRouteInput } from 'src/resolvers/route/dto/update-route.input';
+import { MediaService } from 'src/services/media.service';
 import { ProjectService } from 'src/services/project.service';
 import { RouteService } from 'src/services/route.service';
 
@@ -29,7 +33,8 @@ import { RouteService } from 'src/services/route.service';
 export class RoutesController {
   constructor(
     private readonly routeService: RouteService,
-    private readonly projectService: ProjectService
+    private readonly projectService: ProjectService,
+    private readonly mediaService: MediaService
   ) {}
 
   @Get('me')
@@ -55,7 +60,7 @@ export class RoutesController {
   async getSingle(@CurrentUser() user: User, @Param('id') id: string) {
     return this.routeService.getOne(user.id, id);
   }
-  
+
   @Get(':id/projects')
   @ApiResponse({ status: 200, type: Project, isArray: true })
   async grtProjectsForRoute(
@@ -85,5 +90,12 @@ export class RoutesController {
   @Delete(':id')
   async deleteRoute(@CurrentUser() user: User, @Param('id') id: string) {
     return this.routeService.remove(user.id, id);
+  }
+
+  @Post(':id/add_image')
+  @UseInterceptors(FileInterceptor('file'))
+  @UseGuards(AuthGuard('jwt'))
+  async uploadFile(@UploadedFile() file: Express.Multer.File, @Param('id') id) {
+    return this.mediaService.createMediaForRoute(file, id);
   }
 }

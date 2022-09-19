@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Zone, Prisma, Grade } from '@prisma/client';
+import { Zone, Prisma, Grade, ZoneType } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { searchByQuery } from 'src/common/common_queries';
 import { ErrorCodes } from 'src/common/error_codes';
@@ -34,15 +34,29 @@ export class ZonesService extends BaseService {
     return this.prisma.zone
       .findMany({
         where: {
-          authorId: authorId,
-          ...searchByQuery('name', params.search),
+          OR: params.search
+            ? [
+                searchByQuery('name', params.search),
+                {
+                  routes: {
+                    some: searchByQuery('name', params.search),
+                  },
+                },
+              ]
+            : [
+                {
+                  authorId: authorId,
+                },
+              ],
+          ...(params.type ? { type: params.type } : {}),
+          ...(params.public != null ? { public: params.public == 'true' } : {}),
         },
         orderBy: {
           [sortBy]: sortDir,
         },
         skip: Number(params.skip ?? 0),
         take: Number(params.take) || this.defaults.defaultPaginationTake,
-        include: { routes: true },
+        include: { routes: { include: { images: true } } },
       })
       .then((zones) => this.computeVirtualPropertiesForZones(authorId, zones));
   }
@@ -71,7 +85,7 @@ export class ZonesService extends BaseService {
         },
         skip: Number(params.skip ?? 0),
         take: Number(params.take) || this.defaults.defaultPaginationTake,
-        include: { routes: true },
+        include: { routes: { include: { images: true } } },
       })
       .then((zones) => this.computeVirtualPropertiesForZones(userId, zones));
   }
@@ -83,7 +97,8 @@ export class ZonesService extends BaseService {
           id,
           authorId,
         },
-        include: { routes: true },
+        include: { routes: { include: { images: true } } },
+
       })
       .then((zone) => this.computeVirtualForZone(authorId, zone));
   }
@@ -94,6 +109,7 @@ export class ZonesService extends BaseService {
         data: {
           name: zoneData.name,
           public: zoneData.public ?? false,
+          type: zoneData.type ?? ZoneType.other,
           authorId: userId,
         },
       });

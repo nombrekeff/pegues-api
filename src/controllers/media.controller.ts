@@ -31,7 +31,7 @@ export class MediaController {
 
   @Get('upload/:id')
   async getFile(@Param('id') id: string) {
-    const file = createReadStream(join(process.cwd(), './upload', id));
+    const file = createReadStream(join(process.cwd(), './media/upload', id));
     return new StreamableFile(file);
   }
 }

@@ -93,7 +93,7 @@ export class ProjectService extends BaseService {
       },
       include: {
         route: {
-          include: { zone: true },
+          include: { zone: true, images: true },
         },
         sessions: {
           orderBy: {

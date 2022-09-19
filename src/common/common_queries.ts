@@ -14,7 +14,7 @@ export const searchByQuery = (
   mode: 'insensitive' | 'default' = 'insensitive'
 ) => ({
   [key]: {
-    startsWith: search,
+    contains: search,
     mode: mode,
   },
 });
