@@ -78,23 +78,20 @@ export class ZonesService extends BaseService {
               authorId: userId,
             },
           ],
-          AND: [
-            {
-              OR: [
-                searchByQuery('name', params.search),
+          AND: params.search
+            ? [
                 {
-                  routes: {
-                    some: {
-                      name: {
-                        contains: params.search ?? '',
-                        mode: 'insensitive',
+                  OR: [
+                    searchByQuery('name', params.search),
+                    {
+                      routes: {
+                        some: searchByQuery('name', params.search),
                       },
                     },
-                  },
+                  ],
                 },
-              ],
-            },
-          ],
+              ]
+            : [],
         },
         orderBy: {
           [sortBy]: sortDir,

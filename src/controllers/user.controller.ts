@@ -13,6 +13,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Grade, User } from '@prisma/client';
+import { ProfileImagePipe } from 'src/common/pipes/sharp_pipes';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { EditUserInput } from 'src/models/dto/edit_user.dto';
 import { SetProfileImageInput } from 'src/models/dto/set_profile_image.dto';
@@ -63,7 +64,7 @@ export class UserController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
     @CurrentUser() user: User,
-    @UploadedFile() file: Express.Multer.File
+    @UploadedFile(ProfileImagePipe) file: Express.Multer.File
   ) {
     const _user = await this.userService.findUser(user.id);
     this.logger.debug('User has profile image, removing', _user);

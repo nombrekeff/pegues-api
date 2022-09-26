@@ -17,7 +17,7 @@ export class TasksService {
     this.logger.debug('Removing unused media');
     const all = await this.prisma.media.findMany({
       where: {
-        AND: [{ authorId: null }, { routeId: null }],
+        AND: [{ userId: null }, { routeId: null }],
       },
     });
 

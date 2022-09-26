@@ -15,6 +15,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from '@prisma/client';
+import { RouteImagePipe } from 'src/common/pipes/sharp_pipes';
 import { HttpResponse } from 'src/common/responses/http_response';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { ProjectQueryArgs } from 'src/models/args/ascent-query.args';
@@ -96,7 +97,7 @@ export class RoutesController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
     @CurrentUser() user: User,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(RouteImagePipe) file: Express.Multer.File,
     @Param('id') id
   ) {
     return this.mediaService.createMediaForRoute(file, id, user);
