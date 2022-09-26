@@ -72,11 +72,27 @@ export class ZonesService extends BaseService {
     return this.prisma.zone
       .findMany({
         where: {
-          ...searchByQuery('name', params.search),
           OR: [
             { public: true },
             {
               authorId: userId,
+            },
+          ],
+          AND: [
+            {
+              OR: [
+                searchByQuery('name', params.search),
+                {
+                  routes: {
+                    some: {
+                      name: {
+                        contains: params.search ?? '',
+                        mode: 'insensitive',
+                      },
+                    },
+                  },
+                },
+              ],
             },
           ],
         },
@@ -98,7 +114,6 @@ export class ZonesService extends BaseService {
           authorId,
         },
         include: { routes: { include: { images: true } } },
-
       })
       .then((zone) => this.computeVirtualForZone(authorId, zone));
   }

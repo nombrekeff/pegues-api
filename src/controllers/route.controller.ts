@@ -63,7 +63,7 @@ export class RoutesController {
 
   @Get(':id/projects')
   @ApiResponse({ status: 200, type: Project, isArray: true })
-  async grtProjectsForRoute(
+  async getProjectsForRoute(
     @CurrentUser() user: User,
     @Param('id') routeId: string,
     @Query() query: ProjectQueryArgs
@@ -92,10 +92,21 @@ export class RoutesController {
     return this.routeService.remove(user.id, id);
   }
 
-  @Post(':id/add_image')
+  @Post(':id/files')
   @UseInterceptors(FileInterceptor('file'))
-  @UseGuards(AuthGuard('jwt'))
-  async uploadFile(@UploadedFile() file: Express.Multer.File, @Param('id') id) {
-    return this.mediaService.createMediaForRoute(file, id);
+  async uploadFile(
+    @CurrentUser() user: User,
+    @UploadedFile() file: Express.Multer.File,
+    @Param('id') id
+  ) {
+    return this.mediaService.createMediaForRoute(file, id, user);
+  }
+
+  @Delete('files/:media_id')
+  async deleteFile(
+    @CurrentUser() user: User,
+    @Param('id') media_id,
+  ) {
+    return this.mediaService.removeMediaById(media_id, user);
   }
 }

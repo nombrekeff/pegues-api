@@ -7,7 +7,7 @@ export class SortHelper {
     params: any,
     validParams: any,
     defaultSortBy = 'updatedAt',
-    defaultSortDir = 'asc'
+    defaultSortDir = 'desc'
   ): SortArgs<T> {
     let { sortBy, sortDir }: any = {
       sortBy: defaultSortBy,

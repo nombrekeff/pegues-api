@@ -1,0 +1,2 @@
+DELETE FROM Media
+WHERE 1=1;

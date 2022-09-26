@@ -20,6 +20,11 @@ export class SessionService extends BaseService {
   }
 
   async getAllForUser(authorId: string, params: SessionQueryArgs = {}) {
+    const { sortBy, sortDir } = SortHelper.safeSortParams(
+      params,
+      ascentSortParams
+    );
+
     return this.prisma.session.findMany({
       where: {
         authorId,
@@ -29,6 +34,9 @@ export class SessionService extends BaseService {
         ...(params.routeId != null
           ? { project: { routeId: params.routeId } }
           : {}),
+      },
+      orderBy: {
+        [sortBy]: sortDir,
       },
     });
   }
@@ -126,7 +134,7 @@ export class SessionService extends BaseService {
       const proj = await this.prisma.project.findFirst({
         where: { routeId: data.routeId, authorId: userId },
       });
-      
+
       if (!proj) {
         const createdProj = await this.projectService.create(userId, data);
         data.projectId = createdProj.id;

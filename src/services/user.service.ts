@@ -13,8 +13,9 @@ export class UserService extends BaseService {
     routes: false,
     projects: false,
     preferences: true,
-    profileImage: { select: { path: true, filename: true } },
+    profileImage: true,
   };
+  
   constructor(private passwordService: PasswordService) {
     super();
   }

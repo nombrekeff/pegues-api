@@ -1,7 +1,7 @@
 import { HttpStatus } from '@nestjs/common';
 import { Injectable } from '@nestjs/common';
 import { HttpException } from '@nestjs/common/exceptions';
-import { Grade, Prisma, Route } from '@prisma/client';
+import { Prisma, Route } from '@prisma/client';
 import { ErrorCodes } from 'src/common/error_codes';
 import { SortHelper } from 'src/common/sort_helper';
 import { routeSortParams } from 'src/models/route.model';
@@ -16,6 +16,7 @@ import {
 import { DefaultsConfig } from 'src/configs/config.interface';
 import { HttpResponse } from 'src/common/responses/http_response';
 import { BaseService } from './base.service';
+import { ZonesService } from 'src/services/zones.service';
 
 @Injectable()
 export class RouteService extends BaseService {
@@ -155,11 +156,23 @@ export class RouteService extends BaseService {
             : {}),
           projects: projectsWhere,
           OR: [{ public: true }, { authorId: userId }],
-          // TODO: Fix searching
-          name: { contains: params.search ?? '', mode: 'insensitive' },
-          zone: {
-            name: { contains: params.search ?? '', mode: 'insensitive' },
-          },
+          AND: [
+            {
+              OR: [
+                {
+                  name: { contains: params.search ?? '', mode: 'insensitive' },
+                },
+                {
+                  zone: {
+                    name: {
+                      contains: params.search ?? '',
+                      mode: 'insensitive',
+                    },
+                  },
+                },
+              ],
+            },
+          ],
         },
         include: {
           zone: true,

@@ -26,22 +26,27 @@ import { MediaModule } from './resolvers/media.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { PugAdapter } from '@nestjs-modules/mailer/dist/adapters/pug.adapter';
 import path from 'path';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TasksService } from './controllers/tasks.controller';
+import { TasksModule } from './resolvers/tasks.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [config] }),
     AuthModule,
     UserModule,
-    ZoneModule,
     RouteModule,
+    ZoneModule,
     ProjectModule,
     SessionModule,
     UserPreferencesModule,
+    TasksModule,
     SystemModule,
     MediaModule,
     MulterModule.register({
       dest: './media/upload',
     }),
+    ScheduleModule.forRoot(),
     MailerModule.forRoot({
       // transport: 'smtp://info@mis-pegues.com:WrRrKG7XMX6SK3HQ@smtp.mis-pegues.com',
       transport: {

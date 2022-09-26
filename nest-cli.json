@@ -6,5 +6,8 @@
     "plugins": [
       "@nestjs/swagger/plugin"
     ]
-  }
+  },
+  "ignore": [
+    "/media"
+  ]
 }
