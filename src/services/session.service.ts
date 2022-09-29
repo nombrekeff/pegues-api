@@ -182,10 +182,16 @@ export class SessionService extends BaseService {
         description: data.description,
       };
 
+      console.log(data.ascent_date);
       if (data.ascent_date) {
-        dataToEdit['ascent_date'] = new Date(data.ascent_date);
+        const date = new Date(data.ascent_date);
+
+        dataToEdit['ascent_date'] = new Date(
+          date.getTime() + Math.abs(date.getTimezoneOffset() * 60000)
+        );
       }
 
+      console.log(dataToEdit);
       const route = await this.prisma.session.update({
         where: {
           id: id,

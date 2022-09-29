@@ -29,6 +29,7 @@ import path from 'path';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksService } from './controllers/tasks.controller';
 import { TasksModule } from './resolvers/tasks.module';
+import { MailingModule } from './resolvers/mailer.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { TasksModule } from './resolvers/tasks.module';
     TasksModule,
     SystemModule,
     MediaModule,
+    MailingModule,
     MulterModule.register({
       dest: './media/upload',
     }),

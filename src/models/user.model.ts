@@ -16,7 +16,10 @@ export class User extends BaseModel {
   email: string;
   
   @ApiProperty()
-  firstname?: string;
+  firstname: string;
+
+  @ApiProperty()
+  lastname: string;
 
   @ApiProperty()
   username?: string;
@@ -24,8 +27,6 @@ export class User extends BaseModel {
   @ApiProperty()
   profileImage?: Media;
 
-  @ApiProperty()
-  lastname?: string;
  
   @ApiProperty()
   preferences: UserPreferences;

@@ -13,97 +13,100 @@ generator dbml {
 }
 
 model User {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  email       String   @unique
-  password    String   
-  firstname   String?
-  lastname    String?
-  username    String?
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  email     String   @unique
+  password  String
+  firstname String?
+  lastname  String?
+  username  String?
 
-  profileImage    Media? @relation("profileImage")
+  profileImage Media? @relation("profileImage")
 
-  zones         Zone[]   
-  routes        Route[]
-  projects      Project[]
-  sessions      Session[]
-  roles         Role[]   
-  images        Media[] @relation("author")  
-  preferences   UserPreferences?
+  zones       Zone[]
+  routes      Route[]
+  projects    Project[]
+  sessions    Session[]
+  roles       Role[]
+  images      Media[]          @relation("author")
+  preferences UserPreferences?
 
-  @@unique([id])
+  emailValidationCode ValidationCode?
+  emailValidated      Boolean         @default(false)
+
+  @@unique([id, email])
 }
 
 model Zone {
   id          String   @id @default(cuid())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  name        String   
-  description String?   
+  name        String
+  description String?
   type        ZoneType @default(outdoors)
   public      Boolean  @default(false)
 
-  author      User?    @relation(fields: [authorId], references: [id])
-  authorId    String?   
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId String?
 
-  routes      Route[]
+  routes Route[]
 
   @@unique([authorId, id])
 }
 
 model Route {
-  id          String     @id @default(cuid())
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  name        String   
-  description String?   
-  public      Boolean   @default(false)
+  id          String          @id @default(cuid())
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  name        String
+  description String?
+  public      Boolean         @default(false)
   grade       Grade           @default(uknown)
   discipline  RouteDiscipline @default(other)
 
-  images      Media[]
-  projects    Project[]
+  images   Media[]
+  projects Project[]
 
-  author      User?     @relation(fields: [authorId], references: [id])
-  authorId    String?   
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId String?
 
-  zone        Zone?     @relation(fields: [zoneId], references: [id])
-  zoneId      String?
+  zone   Zone?   @relation(fields: [zoneId], references: [id])
+  zoneId String?
 
   @@unique([authorId, id])
 }
 
 model Project {
-  id          String    @id @default(cuid())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  public      Boolean   @default(false)
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  public    Boolean  @default(false)
 
-  route       Route?   @relation(fields: [routeId], references: [id])
-  routeId     String?
+  route   Route?  @relation(fields: [routeId], references: [id])
+  routeId String?
 
-  author      User?     @relation(fields: [authorId], references: [id])
-  authorId    String?   
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId String?
 
-  sessions    Session[]
+  sessions Session[]
 
   @@unique([routeId, id])
 }
 
 model Session {
-  id          String    @id @default(cuid())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   description String?
-  notes       String[]  
-  public      Boolean   @default(false)
+  notes       String[]
+  public      Boolean  @default(false)
 
-  project     Project?  @relation(fields: [projectId], references: [id])
-  projectId   String?
+  project   Project? @relation(fields: [projectId], references: [id])
+  projectId String?
 
-  author      User?     @relation(fields: [authorId], references: [id])
-  authorId    String?   
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId String?
 
   ascent_date DateTime?
   start_date  DateTime?
@@ -115,35 +118,49 @@ model Session {
 }
 
 model Media {
-  id          String    @id @default(cuid())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  mimetype    String
-  filename    String
-  path        String
-  size        Int
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  mimetype  String
+  filename  String
+  path      String
+  size      Int
 
-  author      User    @relation(name: "author", fields: [authorId], references: [id])
-  authorId    String  
+  author   User   @relation(name: "author", fields: [authorId], references: [id])
+  authorId String
 
-  user        User?    @relation(name: "profileImage", fields: [userId], references: [id])
-  userId      String?  @unique
+  user   User?   @relation(name: "profileImage", fields: [userId], references: [id])
+  userId String? @unique
 
-  route       Route?   @relation(fields: [routeId], references: [id])
-  routeId     String?
+  route   Route?  @relation(fields: [routeId], references: [id])
+  routeId String?
 
   @@unique([id])
 }
 
 model UserPreferences {
-  id                  String   @id @default(cuid())
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  id                  String          @id @default(cuid())
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
   preferredDiscipline RouteDiscipline @default(lead)
-  enableVibration     Boolean @default(true)
+  enableVibration     Boolean         @default(true)
 
-  author    User?     @relation(fields: [authorId], references: [id])
-  authorId  String?   @unique
+  author   User?   @relation(fields: [authorId], references: [id])
+  authorId String? @unique
+
+  @@unique([authorId, id])
+}
+
+model ValidationCode {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  code String 
+
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String @unique
+
   @@unique([authorId, id])
 }
 
@@ -199,5 +216,5 @@ enum Grade {
   g9BP
   g9C
   g9CP
-  uknown  
+  uknown
 }

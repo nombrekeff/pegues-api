@@ -3,16 +3,19 @@ import { Body, Controller, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { LoginData } from 'src/models/dto/login.dto';
 import { RefreshData } from 'src/models/dto/refresh.dto';
+import { ValidateEmailData } from 'src/models/dto/validate_email.dto';
 import { Token } from 'src/models/token.model';
 import { SignupInput } from 'src/resolvers/auth/dto/signup.input';
+import { ValidateEmailInput } from 'src/resolvers/auth/dto/validate_email.input';
 import { AuthService } from 'src/services/auth.service';
+import { MailingService } from 'src/services/mailing.service';
 
 @Controller('auth')
 @ApiTags('auth')
 export class AuthController {
   constructor(
     private readonly auth: AuthService,
-    private readonly mailerService: MailerService
+    private readonly mailService: MailingService
   ) {}
 
   @Post('login')
@@ -27,21 +30,19 @@ export class AuthController {
 
   @Post('signup')
   async signup(@Body() data: SignupInput): Promise<Token> {
-    return this.auth.createUser(data);
+    return this.auth.createUser(data).then(async (res) => {
+      this.auth.sendWelcomeEmail(data);
+      return res;
+    });
   }
 
-  @Post('test')
-  example() {
-    return this.mailerService
-      .sendMail({
-        to: 'manoloedge96@gmail.com',
-        subject: 'Bienvenido a Pegues!',
-        template: 'test',
-        context: {
-          'code': 'ffssasdasdhaosuydh',
-          'user': 'manolo',
-          'activate_url': 'https://mis-pegues.com/activate/ffssasdasdhaosuydh'
-        } 
-      });
+  @Post('validate_email')
+  async validateEmail(@Body() data: ValidateEmailData) {
+    return this.auth.validateEmail(data);
+  }
+
+  @Post('send_validation_email')
+  async sendValidationEmail(@Body() data: ValidateEmailInput) {
+    return this.auth.sendWelcomeEmail(data);
   }
 }
